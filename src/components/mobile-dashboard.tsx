@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import { toPng } from "html-to-image";
+import { toJpeg } from "html-to-image";
 import {
   ArrowDownCircle,
   BadgePlus,
@@ -508,7 +508,7 @@ export function MobileDashboard() {
     setOrderForm({
       customerName: request.customer_name || "",
       shippingCost: "0",
-      note: `[REQUEST #${request.request_code}]\nPesanan: ${request.request_items || ""}\nToko: ${request.store_preferences || "-"}\nHP: ${request.customer_phone || "-"}${request.note ? `\nCatatan: ${request.note}` : ""}`,
+      note: `Pesanan: ${request.request_items || ""}\nToko: ${request.store_preferences || "-"}${request.note ? `\nCatatan Tambahan: ${request.note}` : ""}`,
       shippingAddressLink: request.google_maps_link || "",
     });
     setActiveTab("order");
@@ -595,20 +595,21 @@ export function MobileDashboard() {
     try {
       await document.fonts.ready;
 
-      const dataUrl = await toPng(invoiceRef.current, {
+      const dataUrl = await toJpeg(invoiceRef.current, {
         cacheBust: true,
         pixelRatio: 2.5,
         backgroundColor: "#f5f5f5",
+        quality: 0.95,
       });
 
       const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = `nota-order-${activeOrder.order.id}.png`;
+      link.download = `nota-order-${activeOrder.order.id}.jpg`;
       link.click();
 
       setNotice({
         tone: "success",
-        message: "Nota berhasil diunduh sebagai gambar PNG.",
+        message: "Nota berhasil diunduh sebagai gambar JPG.",
       });
     } catch (error) {
       setNotice({
@@ -655,12 +656,12 @@ export function MobileDashboard() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.36em] text-white/80">
-                  Dashboard pribadi
+                  Dashboard
                 </p>
                 <h1 className="mt-3 font-[family:var(--font-display)] text-4xl font-semibold leading-[0.95]">
-                  Titip barang,
+                  Titip Barang
                   <br />
-                  serasa app native.
+                  JSTIPKU
                 </h1>
               </div>
               <button
@@ -672,10 +673,6 @@ export function MobileDashboard() {
                 <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
               </button>
             </div>
-
-            <p className="mt-4 max-w-[18rem] text-sm leading-6 text-white/86">
-              Kelola produk, ongkir, nota PNG, dan arus kas dari satu layar mobile.
-            </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-[28px] bg-white/18 p-4 backdrop-blur">

@@ -8,7 +8,7 @@ import { use } from "react";
 /* ─── Tracking Steps Definition ─── */
 const TRACKING_STEPS: { key: TrackingStatus; label: string; icon: string }[] = [
   { key: "pending", label: "Pesanan Dibuat", icon: "📝" },
-  { key: "heading_to_store", label: "Jastip Menuju Lokasi Pesanan", icon: "🚗" },
+  { key: "heading_to_store", label: "Jastip Menuju Lokasi Pesanan", icon: "🛵" },
   { key: "picking_up", label: "Jastip Mengambil Pesanan", icon: "🛒" },
   { key: "ready_to_deliver", label: "Pesanan Siap Antar", icon: "📦" },
   { key: "delivering", label: "Jastip Mengantar Pesanan ke Lokasi", icon: "🛵" },
