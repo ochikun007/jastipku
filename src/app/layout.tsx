@@ -15,7 +15,7 @@ const monoFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jstipku Dashboard",
+  title: "Jstipku - Jasa Titip Barang & Makanan",
   description: "Aplikasi Jasa Titip Barang & Makanan",
   manifest: "/manifest.json",
   appleWebApp: {
