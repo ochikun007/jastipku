@@ -58,9 +58,9 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
     <div className="order-page-container">
       <div className="order-page-card">
         <div className="order-page-header">
-          <div className="order-page-logo">🛒</div>
-          <h1 className="order-page-title">Jstip<span className="order-page-title-accent">ku</span></h1>
-          <p className="order-page-subtitle">Jasa Titip Terpercaya</p>
+          <div className="order-page-logo-container mb-4 flex justify-center">
+            <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
+          </div>
         </div>
 
         <div className="order-page-body">
@@ -87,7 +87,7 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 required
                 value={form.customerPhone}
                 onChange={(e) => setForm((c) => ({ ...c, customerPhone: e.target.value }))}
-                placeholder="08xxxxxxxxxx"
+                placeholder="09xxxxxxxx"
                 className="order-form-input"
                 type="tel"
               />
@@ -99,7 +99,7 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 required
                 value={form.requestItems}
                 onChange={(e) => setForm((c) => ({ ...c, requestItems: e.target.value }))}
-                placeholder={"Contoh:\nJamu 2 biji\nCoca Cola 3\nAyam Bakar 1 porsi"}
+                placeholder={"Contoh:\nJambu 2 biji\nCoca Cola 3\nAyam Bakar 1 porsi"}
                 className="order-form-textarea"
                 rows={4}
               />
@@ -171,9 +171,10 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
     <div className="order-page-container">
       <div className="order-page-card">
         <div className="order-page-header">
-          <div className="order-page-logo">{isCompleted ? "🎉" : "📦"}</div>
-          <h1 className="order-page-title">Jstip<span className="order-page-title-accent">ku</span></h1>
-          <p className="order-page-subtitle">Pelacakan Pesanan</p>
+          <div className="order-page-logo-container mb-2 flex justify-center">
+            <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
+          </div>
+          <p className="order-page-subtitle mt-2">{isCompleted ? "🎉 Pesanan Selesai 🎉" : "Pelacakan Pesanan"}</p>
           {request.order_number && (
             <p style={{ marginTop: "0.5rem", fontSize: "1.1rem", fontWeight: 700, letterSpacing: "0.05em" }}>Order #{request.order_number}</p>
           )}

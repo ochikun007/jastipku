@@ -22,6 +22,7 @@ export type Product = {
 export type Order = {
   id: number;
   customer_name: string;
+  customer_phone: string | null;
   shipping_cost: number;
   subtotal: number;
   total_amount: number;
@@ -78,6 +79,7 @@ export type CreateProductInput = {
 
 export type CreateOrderInput = {
   customer_name: string;
+  customer_phone?: string | null;
   shipping_cost: number;
   note?: string;
   shipping_address_link?: string | null;

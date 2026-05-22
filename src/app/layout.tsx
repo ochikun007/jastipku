@@ -15,9 +15,17 @@ const monoFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TitipGo Dashboard",
-  description:
-    "Dashboard jasa titip barang untuk kelola produk, order, nota PNG, dan pembukuan.",
+  title: "Jstipku Dashboard",
+  description: "Aplikasi Jasa Titip Barang & Makanan",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Jstipku",
+  },
+  icons: {
+    apple: "/logo.png",
+  },
 };
 
 export const viewport: Viewport = {

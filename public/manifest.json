@@ -1,0 +1,17 @@
+{
+  "name": "Jstipku - Jasa Titip Barang",
+  "short_name": "Jstipku",
+  "description": "Aplikasi Jasa Titip Barang & Makanan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffaf4",
+  "theme_color": "#ff8c61",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

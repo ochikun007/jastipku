@@ -170,6 +170,7 @@ export const api = {
       .from("orders")
       .insert({
         customer_name: payload.customer_name,
+        customer_phone: payload.customer_phone || null,
         shipping_cost: payload.shipping_cost,
         subtotal,
         total_amount,
@@ -242,7 +243,7 @@ export const api = {
     return data as Store;
   },
 
-  updateOrder: async (id: number, input: { customer_name: string; shipping_cost: number; note?: string; shipping_address_link?: string | null; subtotal: number }): Promise<Order> => {
+  updateOrder: async (id: number, input: { customer_name: string; customer_phone?: string | null; shipping_cost: number; note?: string; shipping_address_link?: string | null; subtotal: number }): Promise<Order> => {
     const total_amount = input.subtotal + input.shipping_cost;
     
     // 1. Update order
@@ -250,6 +251,7 @@ export const api = {
       .from("orders")
       .update({
         customer_name: input.customer_name,
+        customer_phone: input.customer_phone || null,
         shipping_cost: input.shipping_cost,
         total_amount,
         note: input.note || null,
