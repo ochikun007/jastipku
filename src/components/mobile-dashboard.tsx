@@ -951,7 +951,7 @@ export function MobileDashboard() {
                         <button
                           type="button"
                           onClick={() => {
-                            const waLink = `https://wa.me/${order.customer_phone ? order.customer_phone.replace(/^0/, "62") : ""}?text=${encodeURIComponent(`Halo ${order.customer_name}, pesanan Jastip kamu sedang diproses! Pantau posisinya secara live di sini: https://jstipku.online/order/${order.request_code || order.id}`)}`;
+                            const waLink = `https://wa.me/${order.customer_phone ? order.customer_phone.replace(/^0/, "62") : ""}?text=${encodeURIComponent(`Halo ${order.customer_name}, pesanan Jastip kamu sedang diproses! Pantau posisinya secara live di sini: https://jstipku.online/order/${order.id}`)}`;
                             window.open(waLink, "_blank");
                           }}
                           className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 text-center flex items-center justify-center gap-2"
