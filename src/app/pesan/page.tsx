@@ -2,11 +2,12 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 
 export default function PublicOrderPage() {
   const router = useRouter();
+  const [started, setStarted] = useState(false);
   const [form, setForm] = useState({
     customerName: "",
     customerPhone: "",
@@ -40,15 +41,67 @@ export default function PublicOrderPage() {
   }
 
   return (
-    <div className="order-page-container min-h-screen flex justify-center py-8 px-4 relative overflow-hidden">
-      {/* Decorative background elements removed for mobile performance */}
-      
-      <motion.div 
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="order-page-card w-full max-w-xl p-6 sm:p-8 relative z-10"
-      >
+    <div className="order-page-container min-h-screen flex justify-center py-8 px-4 relative overflow-hidden bg-[#fffaf7]">
+      <AnimatePresence mode="wait">
+        {!started ? (
+          <motion.div
+            key="splash"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="flex flex-col justify-center items-center text-center w-full max-w-md my-auto"
+          >
+            <motion.div 
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="bg-white p-6 rounded-full shadow-lg shadow-orange-100 mb-6"
+            >
+              <img src="/logo.png" alt="Jstipku Logo" className="w-32 h-auto mx-auto" />
+            </motion.div>
+            
+            <motion.h1 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+              className="text-3xl font-extrabold text-[#2c1c14] mb-4"
+            >
+              Lagi Mager Keluar?
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+              className="text-[#6d5549] text-base mb-10 leading-relaxed px-4"
+            >
+              Titipin aja ke <strong className="text-[#cc6431]">Jstipku</strong>! Dari beli cemilan kesukaan sampai belanja harian, kami siap beliin dan antar sampai depan pintu. Kamu tinggal duduk manis! 🛋️✨
+            </motion.p>
+            
+            <motion.button
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, type: "spring" }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setStarted(true)}
+              className="w-full max-w-[280px] bg-[linear-gradient(135deg,#ffb347_0%,#ff8c61_48%,#f35b4b_100%)] text-white py-4 px-6 rounded-full font-bold text-lg shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2"
+            >
+              Mulai Order 🚀
+            </motion.button>
+
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+              className="mt-8 flex justify-center gap-5 text-sm text-[#8a6a56] font-medium"
+            >
+              <div className="flex items-center gap-1">⚡ Cepat</div>
+              <div className="flex items-center gap-1">💸 Murah</div>
+              <div className="flex items-center gap-1">✨ Aman</div>
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="form"
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="order-page-card w-full max-w-xl p-6 sm:p-8 relative z-10"
+          >
         <div className="order-page-header text-center mb-6">
           <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover" />
         </div>
@@ -155,8 +208,9 @@ export default function PublicOrderPage() {
               ) : "🚀 Kirim Pesanan"}
             </motion.button>
           </motion.form>
-        </div>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
