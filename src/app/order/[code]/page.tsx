@@ -201,9 +201,9 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
       >
         <div className="order-page-header">
           <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover" />
-          <p className="order-page-subtitle mt-2">{isCompleted ? "🎉 Pesanan Selesai 🎉" : "Pelacakan Pesanan"}</p>
+          <p className="order-page-subtitle mt-2 font-semibold text-[#6d5549]">{isCompleted ? "🎉 Pesanan Selesai 🎉" : "Pelacakan Pesanan"}</p>
           {request.order_number && (
-            <p style={{ marginTop: "0.5rem", fontSize: "1.1rem", fontWeight: 700, letterSpacing: "0.05em" }}>Order #{request.order_number}</p>
+            <p style={{ marginTop: "0.25rem", marginBottom: "1rem", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "0.05em", color: "#2c1c14" }}>Order #{request.order_number}</p>
           )}
         </div>
 
