@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
-import type { OrderRequest, TrackingStatus } from "@/lib/types";
+import type { OrderRequest, TrackingStatus, OrderDetail } from "@/lib/types";
 import { use } from "react";
 import { motion } from "framer-motion";
 
@@ -184,11 +184,30 @@ function formatTrackingTime(isoString: string): string {
   }
 }
 
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh: () => void }) {
   const currentIndex = getStepIndex(request.tracking_status);
   const isCompleted = request.tracking_status === "completed";
   const timestamps = request.tracking_timestamps || {};
   const [refreshing, setRefreshing] = useState(false);
+  const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
+
+  useEffect(() => {
+    // 4 is the index for "ready_to_deliver" (Pesanan Siap Antar)
+    if (currentIndex >= 4 && request.linked_order_id) {
+      api.getOrder(request.linked_order_id)
+        .then(setOrderDetail)
+        .catch(console.error);
+    }
+  }, [currentIndex, request.linked_order_id]);
 
   async function handleManualRefresh() {
     setRefreshing(true);
@@ -286,6 +305,48 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
               );
             })}
           </motion.div>
+
+          {/* Receipt UI */}
+          {orderDetail && (
+            <motion.div 
+              className="mt-6 border border-[#f2dfcf] bg-white/80 rounded-[28px] p-5 shadow-sm"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="flex items-center gap-2 mb-4 border-b border-[#f2dfcf]/50 pb-3">
+                <span className="text-xl">🧾</span>
+                <h3 className="font-bold text-[#4a3525] uppercase tracking-wider text-xs">Rincian Tagihan</h3>
+              </div>
+              
+              <div className="space-y-3 mb-4">
+                {orderDetail.items.map((item) => (
+                  <div key={item.id} className="flex justify-between items-start text-sm">
+                    <div className="flex-1 pr-4">
+                      <p className="font-semibold text-[#2c1c14]">{item.product_name}</p>
+                      <p className="text-xs text-[#8a6a56]">{item.quantity}x @ {formatCurrency(item.unit_price)}</p>
+                    </div>
+                    <p className="font-semibold text-[#4a3525]">{formatCurrency(item.line_total)}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-dashed border-[#f2dfcf] pt-3 space-y-2 text-sm">
+                <div className="flex justify-between text-[#6d5549]">
+                  <span>Subtotal Barang</span>
+                  <span className="font-medium">{formatCurrency(orderDetail.order.subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-[#6d5549]">
+                  <span>Ongkos Kirim (Jastip)</span>
+                  <span className="font-medium">{formatCurrency(orderDetail.order.shipping_cost)}</span>
+                </div>
+                <div className="flex justify-between text-base font-bold text-[#cc6431] pt-3 mt-1 border-t border-[#f2dfcf]/50">
+                  <span>Total Harus Dibayar</span>
+                  <span>{formatCurrency(orderDetail.order.total_amount)}</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Completion message */}
           {isCompleted && (
