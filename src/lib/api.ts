@@ -328,6 +328,47 @@ export const api = {
     return data as OrderRequest;
   },
 
+  createDirectOrderRequest: async (input: SubmitOrderRequestInput): Promise<OrderRequest> => {
+    const request_code = generateCode(8);
+
+    // Generate order_number: DDMMYYXX
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, "0");
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const yy = String(now.getFullYear()).slice(-2);
+    const datePrefix = `${dd}${mm}${yy}`;
+
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const { count } = await supabase
+      .from("order_requests")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", startOfDay);
+    const seq = String((count || 0) + 1).padStart(2, "0");
+    const order_number = `${datePrefix}${seq}`;
+
+    const { data, error } = await supabase
+      .from("order_requests")
+      .insert({
+        request_code,
+        order_number,
+        customer_name: input.customer_name,
+        customer_phone: input.customer_phone,
+        google_maps_link: input.google_maps_link || null,
+        request_items: input.request_items,
+        store_preferences: input.store_preferences || null,
+        note: input.note || null,
+        status: "pending",
+        tracking_status: "pending",
+        tracking_timestamps: { pending: now.toISOString() },
+      })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    return data as OrderRequest;
+  },
+
+
   getOrderRequests: async (): Promise<OrderRequest[]> => {
     const { data, error } = await supabase
       .from("order_requests")

@@ -733,8 +733,27 @@ export function MobileDashboard() {
           <SectionShell
             icon={<BadgePlus className="h-5 w-5" />}
             title="Link Order Pelanggan"
-            caption="Generate link unik untuk pelanggan agar mereka bisa langsung pesan lewat HP."
+            caption="Share link publik universal untuk promosi, atau generate link spesifik (private) untuk pelanggan tertentu."
           >
+            <div className="mb-4 rounded-2xl bg-orange-50 border border-orange-200 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-orange-700 mb-2">Link Publik (Promosi Universal):</p>
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value="https://jstipku.vercel.app/pesan"
+                  className="flex-1 rounded-xl bg-white border border-orange-200 px-3 py-2 text-sm text-orange-900 font-mono"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <button
+                  type="button"
+                  onClick={() => { void navigator.clipboard.writeText("https://jstipku.vercel.app/pesan"); setNotice({ tone: "success", message: "Link Publik disalin!" }); }}
+                  className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 transition shrink-0"
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={handleGenerateLink}
@@ -742,7 +761,7 @@ export function MobileDashboard() {
               className="action-button"
             >
               <BadgePlus className="h-4 w-4" />
-              Generate Link Baru
+              Generate Link Private (Spesifik)
             </button>
             {generatedLink && (
               <div className="mt-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4">
