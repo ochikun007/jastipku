@@ -14,6 +14,7 @@ import {
   BadgePlus,
   BookOpenText,
   Home,
+  LogOut,
   PackagePlus,
   ReceiptText,
   RefreshCw,
@@ -28,6 +29,7 @@ import { InvoiceCard } from "@/components/invoice-card";
 import { api } from "@/lib/api";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import type { Store, LedgerEntry, Order, OrderDetail, OrderRequest, Product, Summary, CreateProductInput, TrackingStatus } from "@/lib/types";
+import { logoutAdmin } from "@/app/actions";
 
 const EMPTY_SUMMARY: Summary = {
   total_income: 0,
@@ -664,14 +666,26 @@ export function MobileDashboard() {
                   JSTIPKU
                 </h1>
               </div>
-              <button
-                type="button"
-                onClick={() => void refreshDashboard()}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/15 text-white transition hover:bg-white/25"
-                aria-label="Refresh data"
-              >
-                <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void logoutAdmin()}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-rose-500/80 text-white transition hover:bg-rose-600"
+                  aria-label="Logout"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void refreshDashboard()}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-white/15 text-white transition hover:bg-white/25"
+                  aria-label="Refresh data"
+                  title="Refresh Dashboard"
+                >
+                  <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+                </button>
+              </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
