@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { api } from "@/lib/api";
 
 export default function PublicOrderPage() {
@@ -39,8 +40,17 @@ export default function PublicOrderPage() {
   }
 
   return (
-    <div className="order-page-container min-h-screen bg-[#fffaf4] flex justify-center py-8 px-4">
-      <div className="order-page-card w-full max-w-xl bg-white rounded-[32px] shadow-[0_24px_80px_rgba(100,49,16,0.12)] p-6 sm:p-8">
+    <div className="order-page-container min-h-screen flex justify-center py-8 px-4 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-64 h-64 rounded-full bg-[#ffb347] opacity-20 blur-3xl"></div>
+      <div className="absolute bottom-[20%] right-[-10%] w-72 h-72 rounded-full bg-[#f35b4b] opacity-10 blur-3xl"></div>
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="order-page-card w-full max-w-xl p-6 sm:p-8 relative z-10"
+      >
         <div className="order-page-header text-center mb-8">
           <div className="order-page-logo-container mb-4 flex justify-center">
             <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
@@ -53,8 +63,16 @@ export default function PublicOrderPage() {
 
           {error && <div className="order-form-error mb-4 p-3 bg-red-100 text-red-700 rounded-xl text-sm font-semibold">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="order-form space-y-4">
-            <div className="order-form-group">
+          <motion.form 
+            onSubmit={handleSubmit} 
+            className="order-form space-y-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1 } }
+            }}
+          >
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">Nama Lengkap *</label>
               <input
                 required
@@ -63,9 +81,9 @@ export default function PublicOrderPage() {
                 placeholder="Nama Anda"
                 className="order-form-input w-full px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-2xl focus:border-[#cc6431] outline-none transition"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">Nomor WhatsApp *</label>
               <input
                 required
@@ -74,9 +92,9 @@ export default function PublicOrderPage() {
                 placeholder="08123456789"
                 className="order-form-input w-full px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-2xl focus:border-[#cc6431] outline-none transition"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">📝 Daftar Pesanan *</label>
               <textarea
                 required
@@ -86,9 +104,9 @@ export default function PublicOrderPage() {
                 rows={4}
                 className="order-form-textarea w-full px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-2xl focus:border-[#cc6431] outline-none transition resize-none"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">Pilihan Toko (Opsional)</label>
               <input
                 value={form.storePreferences}
@@ -96,9 +114,9 @@ export default function PublicOrderPage() {
                 placeholder="Nama toko / warung (opsional)"
                 className="order-form-input w-full px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-2xl focus:border-[#cc6431] outline-none transition"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">📍 Link Google Maps (Alamat Pengiriman)</label>
               <input
                 value={form.googleMapsLink}
@@ -106,9 +124,9 @@ export default function PublicOrderPage() {
                 placeholder="Tempel link Google Maps Anda"
                 className="order-form-input w-full px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-2xl focus:border-[#cc6431] outline-none transition"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">Catatan Tambahan</label>
               <input
                 value={form.note}
@@ -116,14 +134,25 @@ export default function PublicOrderPage() {
                 placeholder="Pesan khusus (opsional)"
                 className="order-form-input w-full px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-2xl focus:border-[#cc6431] outline-none transition"
               />
-            </div>
+            </motion.div>
 
-            <button type="submit" disabled={submitting} className="order-form-submit w-full mt-6 py-4 bg-[linear-gradient(135deg,#ffb347_0%,#ff8c61_48%,#f35b4b_100%)] text-white font-bold rounded-2xl hover:opacity-90 transition disabled:opacity-50">
-              {submitting ? "Mengirim..." : "🚀 Kirim Pesanan"}
-            </button>
-          </form>
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit" 
+              disabled={submitting} 
+              className="order-form-submit w-full mt-6 py-4 bg-[linear-gradient(135deg,#ffb347_0%,#ff8c61_48%,#f35b4b_100%)] text-white font-bold rounded-2xl shadow-[0_16px_32px_rgba(228,110,53,0.25)] transition disabled:opacity-50"
+            >
+              {submitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  Mengirim...
+                </span>
+              ) : "🚀 Kirim Pesanan"}
+            </motion.button>
+          </motion.form>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import type { OrderRequest, TrackingStatus } from "@/lib/types";
 import { use } from "react";
+import { motion } from "framer-motion";
 
 /* ─── Tracking Steps Definition ─── */
 const TRACKING_STEPS: { key: TrackingStatus; label: string; icon: string }[] = [
@@ -55,8 +56,17 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
   }
 
   return (
-    <div className="order-page-container">
-      <div className="order-page-card">
+    <div className="order-page-container relative overflow-hidden min-h-screen">
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-64 h-64 rounded-full bg-[#ffb347] opacity-20 blur-3xl"></div>
+      <div className="absolute bottom-[20%] right-[-10%] w-72 h-72 rounded-full bg-[#f35b4b] opacity-10 blur-3xl"></div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="order-page-card relative z-10"
+      >
         <div className="order-page-header">
           <div className="order-page-logo-container mb-4 flex justify-center">
             <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
@@ -69,8 +79,14 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
 
           {error && <div className="order-form-error">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="order-form">
-            <div className="order-form-group">
+          <motion.form 
+            onSubmit={handleSubmit} 
+            className="order-form"
+            initial="hidden"
+            animate="visible"
+            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+          >
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label">Nama Lengkap *</label>
               <input
                 required
@@ -79,10 +95,10 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 placeholder="Nama Anda"
                 className="order-form-input"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
-              <label className="order-form-label">No. HP / WhatsApp *</label>
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
+              <label className="order-form-label">Nomor WhatsApp *</label>
               <input
                 required
                 value={form.customerPhone}
@@ -91,10 +107,10 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 className="order-form-input"
                 type="tel"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
-              <label className="order-form-label">Daftar Pesanan *</label>
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
+              <label className="order-form-label">📝 Daftar Pesanan *</label>
               <textarea
                 required
                 value={form.requestItems}
@@ -103,19 +119,19 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 className="order-form-textarea"
                 rows={4}
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
-              <label className="order-form-label">Dari Toko Mana?</label>
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
+              <label className="order-form-label">Pilihan Toko (Opsional)</label>
               <input
                 value={form.storePreferences}
                 onChange={(e) => setForm((c) => ({ ...c, storePreferences: e.target.value }))}
                 placeholder="Nama toko / warung (opsional)"
                 className="order-form-input"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label">📍 Link Google Maps (Alamat Pengiriman)</label>
               <input
                 value={form.googleMapsLink}
@@ -123,9 +139,9 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 placeholder="Tempel link Google Maps Anda"
                 className="order-form-input"
               />
-            </div>
+            </motion.div>
 
-            <div className="order-form-group">
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
               <label className="order-form-label">Catatan Tambahan</label>
               <input
                 value={form.note}
@@ -133,14 +149,20 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 placeholder="Pesan khusus (opsional)"
                 className="order-form-input"
               />
-            </div>
+            </motion.div>
 
-            <button type="submit" disabled={submitting} className="order-form-submit">
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit" 
+              disabled={submitting} 
+              className="order-form-submit"
+            >
               {submitting ? "Mengirim..." : "🚀 Kirim Pesanan"}
-            </button>
-          </form>
+            </motion.button>
+          </motion.form>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -168,8 +190,17 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
   }
 
   return (
-    <div className="order-page-container">
-      <div className="order-page-card">
+    <div className="order-page-container relative overflow-hidden min-h-screen">
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-64 h-64 rounded-full bg-[#ffb347] opacity-20 blur-3xl"></div>
+      <div className="absolute bottom-[20%] right-[-10%] w-72 h-72 rounded-full bg-[#f35b4b] opacity-10 blur-3xl"></div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="order-page-card relative z-10"
+      >
         <div className="order-page-header">
           <div className="order-page-logo-container mb-2 flex justify-center">
             <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
@@ -212,18 +243,32 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
           </div>
 
           {/* Tracking Stepper */}
-          <div className="tracking-stepper">
+          <motion.div 
+            className="tracking-stepper"
+            initial="hidden"
+            animate="visible"
+            variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
+          >
             {TRACKING_STEPS.map((step, index) => {
               const isDone = index <= currentIndex;
               const isActive = index === currentIndex;
               const stepTime = timestamps[step.key];
 
               return (
-                <div key={step.key} className="tracking-step">
+                <motion.div 
+                  key={step.key} 
+                  className="tracking-step"
+                  variants={{ hidden: { opacity: 0, x: -10 }, visible: { opacity: 1, x: 0 } }}
+                >
                   <div className="tracking-step-line-area">
-                    <div className={`tracking-step-dot ${isDone ? "tracking-step-dot-done" : ""} ${isActive ? "tracking-step-dot-active" : ""}`}>
+                    <motion.div 
+                      className={`tracking-step-dot ${isDone ? "tracking-step-dot-done" : ""} ${isActive ? "tracking-step-dot-active" : ""}`}
+                      initial={isDone || isActive ? { scale: 0 } : false}
+                      animate={isDone || isActive ? { scale: 1 } : false}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
                       {isDone ? "✓" : step.icon}
-                    </div>
+                    </motion.div>
                     {index < TRACKING_STEPS.length - 1 && (
                       <div className={`tracking-step-line ${isDone ? "tracking-step-line-done" : ""}`} />
                     )}
@@ -234,44 +279,53 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
                       <span className="tracking-step-time">{formatTrackingTime(stepTime)}</span>
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Completion message */}
           {isCompleted && (
-            <div className="tracking-complete-msg">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, type: "spring" }}
+              className="tracking-complete-msg"
+            >
               <p className="tracking-complete-title">Terima kasih sudah menggunakan jasa <strong>Jstipku</strong>! 🧡</p>
               <p className="tracking-complete-sub">Jangan lupa order lagi ya!</p>
-            </div>
+            </motion.div>
           )}
 
           {/* Google Maps link */}
           {request.google_maps_link && (
-            <a
+            <motion.a
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               href={request.google_maps_link}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="tracking-maps-btn"
             >
-              📍 Lihat Lokasi Pengiriman
-            </a>
+              📍 Buka di Google Maps
+            </motion.a>
           )}
 
           {/* Refresh button */}
-          <button
-            type="button"
-            onClick={handleManualRefresh}
-            className="tracking-maps-btn"
-            style={{ marginTop: "1rem", cursor: "pointer", border: "none" }}
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button" 
+            onClick={() => void handleManualRefresh()} 
+            disabled={refreshing}
+            className="mt-2 rounded-xl bg-[#cc6431] px-4 py-2 text-white font-semibold flex items-center justify-center gap-2 mx-auto disabled:opacity-50"
           >
             {refreshing ? "🔄 Memperbarui..." : "🔄 Refresh Status"}
-          </button>
+          </motion.button>
 
           <p className="tracking-refresh-note">Halaman ini otomatis memperbarui status setiap 5 detik.</p>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
