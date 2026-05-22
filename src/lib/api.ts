@@ -258,7 +258,7 @@ export const api = {
     return order as Order;
   },
 
-  updateOrderStatus: async (id: number, status: "active" | "completed"): Promise<Order> => {
+  updateOrderStatus: async (id: number, status: "active" | "completed" | "cancelled"): Promise<Order> => {
     const { data, error } = await supabase
       .from("orders")
       .update({ status })
@@ -266,6 +266,19 @@ export const api = {
       .select()
       .single();
     if (error) throw error;
+
+    if (status === "cancelled") {
+      // Remove the ledger entry so it doesn't count as income
+      await supabase.from("ledger_entries").delete().eq("related_order_id", id);
+    }
+
     return data as Order;
+  },
+
+  deleteOrder: async (id: number): Promise<void> => {
+    // Delete ledger entry first to keep consistency since it has ON DELETE SET NULL
+    await supabase.from("ledger_entries").delete().eq("related_order_id", id);
+    const { error } = await supabase.from("orders").delete().eq("id", id);
+    if (error) throw error;
   },
 };

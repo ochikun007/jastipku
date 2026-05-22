@@ -27,7 +27,7 @@ export type Order = {
   total_amount: number;
   note: string | null;
   shipping_address_link: string | null;
-  status: "active" | "completed";
+  status: "active" | "completed" | "cancelled";
   order_items?: OrderItem[];
   created_at: string;
 };

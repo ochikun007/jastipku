@@ -423,20 +423,43 @@ export function MobileDashboard() {
     });
   }
 
-  function handleUpdateOrderStatus(orderId: number, status: "active" | "completed") {
+  function handleUpdateOrderStatus(orderId: number, status: "active" | "completed" | "cancelled") {
     startTransition(() => {
       void (async () => {
         try {
           await api.updateOrderStatus(orderId, status);
           await refreshDashboard(false); // background refresh
+          const statusText = status === "completed" ? "Selesai" : status === "cancelled" ? "Dibatalkan" : "Aktif";
           setNotice({
             tone: "success",
-            message: `Status order #${orderId} berhasil diubah menjadi ${status === "completed" ? "Selesai" : "Aktif"}.`,
+            message: `Status order #${orderId} berhasil diubah menjadi ${statusText}.`,
           });
         } catch (error) {
           setNotice({
             tone: "error",
             message: (error as any)?.message || "Gagal mengubah status order.",
+          });
+        }
+      })();
+    });
+  }
+
+  function handleDeleteOrder(orderId: number) {
+    if (!window.confirm(`Apakah Anda yakin ingin menghapus order #${orderId} secara permanen? Pemasukan di Kas juga akan terhapus.`)) return;
+
+    startTransition(() => {
+      void (async () => {
+        try {
+          await api.deleteOrder(orderId);
+          await refreshDashboard();
+          setNotice({
+            tone: "success",
+            message: `Order #${orderId} berhasil dihapus permanen.`,
+          });
+        } catch (error) {
+          setNotice({
+            tone: "error",
+            message: (error as any)?.message || "Gagal menghapus order.",
           });
         }
       })();
@@ -517,6 +540,9 @@ export function MobileDashboard() {
     { id: "order", label: "Order", icon: <WalletCards className="h-5 w-5" /> },
     { id: "kas", label: "Kas", icon: <BookOpenText className="h-5 w-5" /> },
   ];
+
+  const activeOrders = orders.filter((o) => o.status !== "completed" && o.status !== "cancelled");
+  const completedOrders = orders.filter((o) => o.status === "completed" || o.status === "cancelled");
 
   return (
     <main className="relative mx-auto flex min-h-screen w-full max-w-[460px] flex-col px-4 pb-28 pt-5 text-[#2f2118] sm:px-6">
@@ -606,13 +632,13 @@ export function MobileDashboard() {
             title="Order Terbaru"
             caption="Buka kembali detail order kapan saja untuk melihat ringkasan dan membuat nota PNG lagi."
           >
-            {orders.length === 0 ? (
+            {activeOrders.length === 0 ? (
               <p className="empty-state">
-                Belum ada order tersimpan di database.
+                Belum ada order aktif.
               </p>
             ) : (
               <div className="space-y-3">
-                {orders.map((order) => (
+                {activeOrders.map((order) => (
                   <div
                     key={order.id}
                     className="rounded-[24px] border border-[#f2dfcf] bg-white px-4 py-4"
@@ -650,16 +676,15 @@ export function MobileDashboard() {
                         </p>
 
                         {order.shipping_address_link && (
-                          <div className="mt-3 h-32 w-full rounded-xl overflow-hidden border border-[#f2dfcf]">
-                            <iframe 
-                              src={`https://maps.google.com/maps?q=${encodeURIComponent(order.shipping_address_link)}&output=embed`} 
-                              width="100%" 
-                              height="100%" 
-                              style={{ border: 0 }} 
-                              allowFullScreen 
-                              loading="lazy" 
-                              referrerPolicy="no-referrer-when-downgrade"
-                            ></iframe>
+                          <div className="mt-3">
+                            <a 
+                              href={order.shipping_address_link} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#fff0e6] px-4 py-3 text-sm font-semibold text-[#cc6431] transition hover:bg-[#ffe5d4]"
+                            >
+                              📍 Buka Lokasi di Peta
+                            </a>
                           </div>
                         )}
                       </div>
@@ -706,6 +731,23 @@ export function MobileDashboard() {
                         >
                           Buka nota
                         </button>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateOrderStatus(order.id, "cancelled")}
+                            className="flex-1 rounded-full border border-rose-300 bg-rose-50 px-2 py-2 text-[11px] font-semibold text-rose-700 transition hover:bg-rose-100 text-center uppercase tracking-wide"
+                          >
+                            Batal
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteOrder(order.id)}
+                            className="flex-1 rounded-full bg-rose-600 px-2 py-2 text-[11px] font-semibold text-white transition hover:bg-rose-700 text-center flex items-center justify-center"
+                            title="Hapus Permanen"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -735,6 +777,85 @@ export function MobileDashboard() {
               <p className="empty-state">
                 Belum ada nota aktif. Buat order baru atau buka salah satu order terbaru di atas.
               </p>
+            )}
+          </SectionShell>
+
+          <SectionShell
+            icon={<ReceiptText className="h-5 w-5" />}
+            title="Riwayat Order (Selesai & Batal)"
+            caption="Daftar pesanan yang sudah diselesaikan atau dibatalkan."
+          >
+            {completedOrders.length === 0 ? (
+              <p className="empty-state">
+                Belum ada riwayat order.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {completedOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="rounded-[24px] border border-[#e6d8cf] bg-[#f9f5f2] px-4 py-4 opacity-80 transition hover:opacity-100"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-[#5a463d] truncate">
+                            #{order.id} • {order.customer_name}
+                          </p>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${order.status === 'cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-gray-200 text-gray-600'}`}>
+                            {order.status === 'cancelled' ? 'Batal' : 'Selesai'}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm text-[#8a6a56]">
+                          {formatDateTime(order.created_at)}
+                        </p>
+
+                        {order.order_items && order.order_items.length > 0 && (
+                          <div className="mt-3 bg-white/50 rounded-xl p-3 border border-[#f2dfcf]/50">
+                            <ul className="space-y-1">
+                              {order.order_items.map((item, idx) => (
+                                <li key={idx} className="text-sm text-[#6d5549] flex justify-between">
+                                  <span className="truncate mr-2">{item.quantity}x {item.product_name}</span>
+                                  <span className="shrink-0">{formatCurrency(item.line_total)}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <p className="mt-3 text-sm font-semibold text-[#8a6a56]">
+                          Total: <span className="text-[#8a6a56]">{formatCurrency(order.total_amount)}</span>
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {order.status === 'cancelled' && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateOrderStatus(order.id, "active")}
+                            className="rounded-full border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 text-center"
+                          >
+                            Kembalikan Aktif
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => void openInvoice(order.id)}
+                          className="rounded-full border border-[#d1baa7] px-4 py-2 text-sm font-semibold text-[#5a463d] transition hover:bg-[#e6d8cf] text-center"
+                        >
+                          Lihat Nota
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteOrder(order.id)}
+                          className="rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 text-center"
+                        >
+                          Hapus Permanen
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </SectionShell>
         </div>
