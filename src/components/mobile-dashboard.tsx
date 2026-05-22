@@ -735,8 +735,8 @@ export function MobileDashboard() {
             title="Link Order Pelanggan"
             caption="Share link publik universal untuk promosi, atau generate link spesifik (private) untuk pelanggan tertentu."
           >
-            <div className="mb-4 rounded-2xl bg-orange-50 border border-orange-200 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-orange-700 mb-2">Link Publik (Promosi Universal):</p>
+            <div className="rounded-2xl bg-orange-50 border border-orange-200 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-orange-700 mb-2">Link Publik (Sebar ke Medsos):</p>
               <div className="flex items-center gap-2">
                 <input
                   readOnly
@@ -746,43 +746,13 @@ export function MobileDashboard() {
                 />
                 <button
                   type="button"
-                  onClick={() => { void navigator.clipboard.writeText("https://jstipku.vercel.app/pesan"); setNotice({ tone: "success", message: "Link Publik disalin!" }); }}
+                  onClick={() => { void navigator.clipboard.writeText("https://jstipku.vercel.app/pesan"); setNotice({ tone: "success", message: "Link disalin!" }); }}
                   className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 transition shrink-0"
                 >
-                  Copy
+                  Copy Link
                 </button>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={handleGenerateLink}
-              disabled={isPending}
-              className="action-button"
-            >
-              <BadgePlus className="h-4 w-4" />
-              Generate Link Private (Spesifik)
-            </button>
-            {generatedLink && (
-              <div className="mt-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 mb-2">Link siap dikirim ke pelanggan:</p>
-                <div className="flex items-center gap-2">
-                  <input
-                    readOnly
-                    value={generatedLink}
-                    className="flex-1 rounded-xl bg-white border border-emerald-200 px-3 py-2 text-sm text-emerald-900 font-mono"
-                    onClick={(e) => (e.target as HTMLInputElement).select()}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => { void navigator.clipboard.writeText(generatedLink); setNotice({ tone: "success", message: "Link disalin!" }); }}
-                    className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition shrink-0"
-                  >
-                    Salin
-                  </button>
-                </div>
-              </div>
-            )}
           </SectionShell>
 
           {/* Pending Request Queue */}
