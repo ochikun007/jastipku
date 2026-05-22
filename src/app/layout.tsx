@@ -24,7 +24,29 @@ export const metadata: Metadata = {
     title: "Jstipku",
   },
   icons: {
+    icon: "/logo.png",
     apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Jstipku - Jasa Titip Barang & Makanan",
+    description: "Aplikasi Jasa Titip Barang & Makanan. Pesan dengan mudah dan pantau secara live!",
+    url: "https://jstipku.online",
+    siteName: "Jstipku",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 800,
+        alt: "Jstipku Logo",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jstipku - Jasa Titip Barang & Makanan",
+    description: "Aplikasi Jasa Titip Barang & Makanan",
+    images: ["/logo.png"],
   },
 };
 
