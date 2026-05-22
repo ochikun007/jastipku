@@ -51,10 +51,8 @@ export default function PublicOrderPage() {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="order-page-card w-full max-w-xl p-6 sm:p-8 relative z-10"
       >
-        <div className="order-page-header text-center mb-8">
-          <div className="order-page-logo-container mb-4 flex justify-center">
-            <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
-          </div>
+        <div className="order-page-header text-center mb-6">
+          <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover" />
         </div>
 
         <div className="order-page-body">
@@ -117,7 +115,7 @@ export default function PublicOrderPage() {
             </motion.div>
 
             <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
-              <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">📍 Link Google Maps (Alamat Pengiriman)</label>
+              <label className="order-form-label block text-sm font-semibold text-[#6d5549] mb-1">📍 Link Google Maps (Alamat Pengiriman) <span className="text-xs font-normal text-gray-500 ml-1">(Opsional)</span></label>
               <input
                 value={form.googleMapsLink}
                 onChange={(e) => setForm((c) => ({ ...c, googleMapsLink: e.target.value }))}

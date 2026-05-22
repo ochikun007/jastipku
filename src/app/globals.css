@@ -150,10 +150,11 @@ select {
 }
 
 .order-page-header {
-  background: linear-gradient(145deg, rgba(255, 171, 94, 0.95), rgba(241, 92, 74, 0.95));
-  padding: 2rem 1.5rem 1.8rem;
+  background: transparent;
+  padding: 0;
   text-align: center;
   color: white;
+  width: 100%;
 }
 
 .order-page-logo {

@@ -68,9 +68,7 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
         className="order-page-card relative z-10"
       >
         <div className="order-page-header">
-          <div className="order-page-logo-container mb-4 flex justify-center">
-            <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
-          </div>
+          <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover" />
         </div>
 
         <div className="order-page-body">
@@ -132,7 +130,7 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
             </motion.div>
 
             <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="order-form-group">
-              <label className="order-form-label">📍 Link Google Maps (Alamat Pengiriman)</label>
+              <label className="order-form-label">📍 Link Google Maps (Alamat Pengiriman) <span className="text-xs font-normal text-gray-500 ml-1">(Opsional)</span></label>
               <input
                 value={form.googleMapsLink}
                 onChange={(e) => setForm((c) => ({ ...c, googleMapsLink: e.target.value }))}
@@ -202,9 +200,7 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
         className="order-page-card relative z-10"
       >
         <div className="order-page-header">
-          <div className="order-page-logo-container mb-2 flex justify-center">
-            <img src="/logo.png" alt="Jstipku Logo" className="w-48 h-auto object-contain" />
-          </div>
+          <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover" />
           <p className="order-page-subtitle mt-2">{isCompleted ? "🎉 Pesanan Selesai 🎉" : "Pelacakan Pesanan"}</p>
           {request.order_number && (
             <p style={{ marginTop: "0.5rem", fontSize: "1.1rem", fontWeight: 700, letterSpacing: "0.05em" }}>Order #{request.order_number}</p>
