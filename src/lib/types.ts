@@ -109,6 +109,7 @@ export type TrackingStatus =
 export type OrderRequest = {
   id: number;
   request_code: string;
+  order_number: string | null;
   customer_name: string | null;
   customer_phone: string | null;
   google_maps_link: string | null;

@@ -762,6 +762,7 @@ export function MobileDashboard() {
                   <div key={req.id} className="rounded-[24px] border-2 border-amber-300 bg-amber-50 px-4 py-4">
                     <div className="flex items-center gap-2 flex-wrap mb-2">
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-200 text-amber-800">Baru</span>
+                      {req.order_number && <span className="text-xs font-bold text-[#cc6431]">#{req.order_number}</span>}
                       <p className="font-semibold text-[#2c1c14]">{req.customer_name}</p>
                     </div>
                     <p className="text-sm text-[#6d5549]">📱 {req.customer_phone}</p>
@@ -805,7 +806,10 @@ export function MobileDashboard() {
                 {processingRequests.map((req) => (
                   <div key={req.id} className="rounded-[24px] border border-[#f2dfcf] bg-white px-4 py-4">
                     <div className="flex items-center justify-between gap-2 mb-2">
-                      <p className="font-semibold text-[#2c1c14]">{req.customer_name}</p>
+                      <div className="flex items-center gap-2">
+                        {req.order_number && <span className="text-xs font-bold text-[#cc6431]">#{req.order_number}</span>}
+                        <p className="font-semibold text-[#2c1c14]">{req.customer_name}</p>
+                      </div>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700">
                         {TRACKING_OPTIONS.find((t) => t.key === req.tracking_status)?.label || req.tracking_status}
                       </span>
@@ -956,53 +960,6 @@ export function MobileDashboard() {
                           </button>
                         </div>
                       </div>
-                      {/* Tracking Controls — selalu tampil di semua order aktif */}
-                      {order.status === "active" && (() => {
-                        const linkedReq = orderRequests.find((r) => r.linked_order_id === order.id);
-                        const currentStatus = linkedReq?.tracking_status || "pending";
-                        const currentLabel = TRACKING_OPTIONS.find((t) => t.key === currentStatus)?.label || "Belum dimulai";
-
-                        async function onTrackClick(status: TrackingStatus) {
-                          if (linkedReq) {
-                            handleUpdateTracking(linkedReq.id, status);
-                          } else {
-                            // Auto-create tracking for this order
-                            try {
-                              const newReq = await api.createTrackingForOrder(order.id, order.customer_name);
-                              await api.updateTrackingStatus(newReq.id, status);
-                              await refreshDashboard(false);
-                              setNotice({ tone: "success", message: "Tracking berhasil dibuat dan diperbarui." });
-                            } catch (err) {
-                              setNotice({ tone: "error", message: (err as Error).message || "Gagal membuat tracking." });
-                            }
-                          }
-                        }
-
-                        return (
-                          <div className="mt-3 pt-3 border-t border-[#f2dfcf]">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-[#8a6a56] mb-2">
-                              📦 Pelacakan: <span className="text-[#cc6431]">{currentLabel}</span>
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {TRACKING_OPTIONS.map((opt) => (
-                                <button
-                                  key={opt.key}
-                                  type="button"
-                                  disabled={isPending || opt.key === currentStatus}
-                                  onClick={() => void onTrackClick(opt.key)}
-                                  className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
-                                    opt.key === currentStatus
-                                      ? "bg-[#cc6431] text-white"
-                                      : "bg-[#fff3e1] text-[#8a6a56] hover:bg-[#ffe5c7]"
-                                  }`}
-                                >
-                                  {opt.label}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })()}
                     </div>
                   </div>
                 ))}

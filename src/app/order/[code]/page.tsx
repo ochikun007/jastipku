@@ -155,10 +155,17 @@ function formatTrackingTime(isoString: string): string {
   }
 }
 
-function TrackingView({ request }: { request: OrderRequest }) {
+function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh: () => void }) {
   const currentIndex = getStepIndex(request.tracking_status);
   const isCompleted = request.tracking_status === "completed";
   const timestamps = request.tracking_timestamps || {};
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleManualRefresh() {
+    setRefreshing(true);
+    onRefresh();
+    setTimeout(() => setRefreshing(false), 800);
+  }
 
   return (
     <div className="order-page-container">
@@ -167,11 +174,20 @@ function TrackingView({ request }: { request: OrderRequest }) {
           <div className="order-page-logo">{isCompleted ? "🎉" : "📦"}</div>
           <h1 className="order-page-title">Jstip<span className="order-page-title-accent">ku</span></h1>
           <p className="order-page-subtitle">Pelacakan Pesanan</p>
+          {request.order_number && (
+            <p style={{ marginTop: "0.5rem", fontSize: "1.1rem", fontWeight: 700, letterSpacing: "0.05em" }}>Order #{request.order_number}</p>
+          )}
         </div>
 
         <div className="order-page-body">
           {/* Customer info card */}
           <div className="tracking-info-card">
+            {request.order_number && (
+              <div className="tracking-info-row">
+                <span className="tracking-info-label">No. Order</span>
+                <span className="tracking-info-value" style={{ color: "#cc6431" }}>#{request.order_number}</span>
+              </div>
+            )}
             <div className="tracking-info-row">
               <span className="tracking-info-label">Pelanggan</span>
               <span className="tracking-info-value">{request.customer_name}</span>
@@ -242,7 +258,17 @@ function TrackingView({ request }: { request: OrderRequest }) {
             </a>
           )}
 
-          <p className="tracking-refresh-note">Halaman ini otomatis memperbarui status setiap 10 detik.</p>
+          {/* Refresh button */}
+          <button
+            type="button"
+            onClick={handleManualRefresh}
+            className="tracking-maps-btn"
+            style={{ marginTop: "1rem", cursor: "pointer", border: "none" }}
+          >
+            {refreshing ? "🔄 Memperbarui..." : "🔄 Refresh Status"}
+          </button>
+
+          <p className="tracking-refresh-note">Halaman ini otomatis memperbarui status setiap 5 detik.</p>
         </div>
       </div>
     </div>
@@ -281,7 +307,7 @@ export default function OrderRequestPage({ params }: { params: Promise<{ code: s
     if (!request || request.status === "waiting" || request.tracking_status === "completed") return;
     const interval = setInterval(() => {
       void fetchRequest();
-    }, 10_000);
+    }, 5_000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request?.status, request?.tracking_status]);
@@ -317,5 +343,5 @@ export default function OrderRequestPage({ params }: { params: Promise<{ code: s
     return <OrderForm code={code} onSubmitted={(r) => setRequest(r)} />;
   }
 
-  return <TrackingView request={request!} />;
+  return <TrackingView request={request!} onRefresh={() => void fetchRequest()} />;
 }

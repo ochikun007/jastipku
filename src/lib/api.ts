@@ -300,9 +300,26 @@ export const api = {
 
   generateOrderRequest: async (): Promise<OrderRequest> => {
     const request_code = generateCode(8);
+
+    // Generate order_number: DDMMYYXX
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, "0");
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const yy = String(now.getFullYear()).slice(-2);
+    const datePrefix = `${dd}${mm}${yy}`;
+
+    // Count how many requests exist today
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const { count } = await supabase
+      .from("order_requests")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", startOfDay);
+    const seq = String((count || 0) + 1).padStart(2, "0");
+    const order_number = `${datePrefix}${seq}`;
+
     const { data, error } = await supabase
       .from("order_requests")
-      .insert({ request_code })
+      .insert({ request_code, order_number })
       .select()
       .single();
     if (error) throw error;
