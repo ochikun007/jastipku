@@ -56,9 +56,9 @@ export default function PublicOrderPage() {
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="bg-white p-6 rounded-full shadow-lg shadow-orange-100 mb-6"
+              className="w-40 h-40 rounded-full shadow-lg shadow-orange-100 mb-6 overflow-hidden bg-white flex items-center justify-center"
             >
-              <img src="/logo.png" alt="Jstipku Logo" className="w-32 h-auto mx-auto" />
+              <img src="/logo.png" alt="Jstipku Logo" className="w-full h-full object-cover" />
             </motion.div>
             
             <motion.h1 
