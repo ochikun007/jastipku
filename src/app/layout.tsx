@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "Jstipku",
   },
   icons: {
-    icon: "/logo.png",
+    icon: "/logo.ico",
     apple: "/logo.png",
   },
   openGraph: {
