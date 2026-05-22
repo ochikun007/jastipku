@@ -696,9 +696,9 @@ export function MobileDashboard() {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-[28px] bg-white/18 p-4 backdrop-blur">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/70">
-                  Saldo
+                  Laba (Ongkir)
                 </p>
-                <p className="mt-2 font-[family:var(--font-display)] text-3xl font-semibold">
+                <p className="mt-2 font-[family:var(--font-display)] text-2xl font-semibold">
                   {formatCurrency(summary.balance)}
                 </p>
               </div>
@@ -740,13 +740,13 @@ export function MobileDashboard() {
               <div className="flex items-center gap-2">
                 <input
                   readOnly
-                  value="https://jstipku.vercel.app/pesan"
+                  value="https://jstipku.online/pesan"
                   className="flex-1 rounded-xl bg-white border border-orange-200 px-3 py-2 text-sm text-orange-900 font-mono"
                   onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
                 <button
                   type="button"
-                  onClick={() => { void navigator.clipboard.writeText("https://jstipku.vercel.app/pesan"); setNotice({ tone: "success", message: "Link disalin!" }); }}
+                  onClick={() => { void navigator.clipboard.writeText("https://jstipku.online/pesan"); setNotice({ tone: "success", message: "Link disalin!" }); }}
                   className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 transition shrink-0"
                 >
                   Copy Link
@@ -951,7 +951,7 @@ export function MobileDashboard() {
                         <button
                           type="button"
                           onClick={() => {
-                            const waLink = `https://wa.me/${order.customer_phone ? order.customer_phone.replace(/^0/, "62") : ""}?text=${encodeURIComponent(`Halo ${order.customer_name}, pesanan Jastip kamu sedang diproses! Pantau posisinya secara live di sini: https://jstipku.vercel.app/order/${order.id}`)}`;
+                            const waLink = `https://wa.me/${order.customer_phone ? order.customer_phone.replace(/^0/, "62") : ""}?text=${encodeURIComponent(`Halo ${order.customer_name}, pesanan Jastip kamu sedang diproses! Pantau posisinya secara live di sini: https://jstipku.online/order/${order.request_code || order.id}`)}`;
                             window.open(waLink, "_blank");
                           }}
                           className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 text-center flex items-center justify-center gap-2"

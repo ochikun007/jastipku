@@ -192,13 +192,13 @@ export const api = {
 
     if (itemsError) throw itemsError;
 
-    // 3. Insert ledger entry
+    // 3. Insert ledger entry (Only Shipping Cost as Profit)
     const { error: ledgerError } = await supabase.from("ledger_entries").insert({
       entry_type: "income",
       source: "order",
-      category: "Order pelanggan",
+      category: "Ongkos Kirim",
       description: payload.note || null,
-      amount: total_amount,
+      amount: payload.shipping_cost,
       related_order_id: order.id,
     });
 
@@ -263,10 +263,10 @@ export const api = {
 
     if (orderError) throw orderError;
 
-    // 2. Update ledger entry for this order
+    // 2. Update ledger entry for this order (Only Shipping Cost)
     const { error: ledgerError } = await supabase
       .from("ledger_entries")
-      .update({ amount: total_amount, description: input.note || null })
+      .update({ amount: input.shipping_cost, description: input.note || null })
       .eq("related_order_id", id);
 
     if (ledgerError) throw ledgerError;
