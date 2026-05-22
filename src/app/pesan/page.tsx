@@ -134,6 +134,14 @@ export default function PublicOrderPage() {
               />
             </motion.div>
 
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="p-4 bg-orange-50 border border-orange-200 rounded-2xl mb-4 text-sm text-orange-900 shadow-sm">
+              <p className="font-bold flex items-center gap-2 mb-1">
+                <span className="text-xl">💰</span> Informasi Pembayaran
+              </p>
+              <p>Saat ini pembayaran <strong>hanya menggunakan "CASH" (Tunai)</strong>.</p>
+              <p>Diharapkan pelanggan menyiapkan dan <strong>membayar dengan uang pas</strong> saat pesanan tiba. Terima kasih!! 🙏</p>
+            </motion.div>
+
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

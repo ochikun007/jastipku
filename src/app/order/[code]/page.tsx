@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 /* ─── Tracking Steps Definition ─── */
 const TRACKING_STEPS: { key: TrackingStatus; label: string; icon: string }[] = [
   { key: "pending", label: "Pesanan Dibuat", icon: "📝" },
+  { key: "accepted", label: "Pesanan Diterima", icon: "🤝" },
   { key: "heading_to_store", label: "Jastip Menuju Lokasi Pesanan", icon: "🛵" },
   { key: "picking_up", label: "Jastip Mengambil Pesanan", icon: "🛒" },
   { key: "ready_to_deliver", label: "Pesanan Siap Antar", icon: "📦" },
@@ -147,6 +148,14 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
                 placeholder="Pesan khusus (opsional)"
                 className="order-form-input"
               />
+            </motion.div>
+
+            <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="p-4 bg-orange-50 border border-orange-200 rounded-2xl mb-4 text-sm text-orange-900 shadow-sm">
+              <p className="font-bold flex items-center gap-2 mb-1">
+                <span className="text-xl">💰</span> Informasi Pembayaran
+              </p>
+              <p>Saat ini pembayaran <strong>hanya menggunakan "CASH" (Tunai)</strong>.</p>
+              <p>Diharapkan pelanggan menyiapkan dan <strong>membayar dengan uang pas</strong> saat pesanan tiba. Terima kasih!! 🙏</p>
             </motion.div>
 
             <motion.button 

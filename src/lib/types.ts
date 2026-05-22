@@ -101,6 +101,7 @@ export type CreateLedgerInput = {
 export type TrackingStatus =
   | "waiting"
   | "pending"
+  | "accepted"
   | "heading_to_store"
   | "picking_up"
   | "ready_to_deliver"
