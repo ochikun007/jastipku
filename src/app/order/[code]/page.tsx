@@ -198,9 +198,7 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
 
   return (
     <div className="order-page-container relative overflow-hidden min-h-screen">
-      {/* Decorative background elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-64 h-64 rounded-full bg-[#ffb347] opacity-20 blur-3xl"></div>
-      <div className="absolute bottom-[20%] right-[-10%] w-72 h-72 rounded-full bg-[#f35b4b] opacity-10 blur-3xl"></div>
+      {/* Decorative background elements removed for mobile performance */}
 
       <motion.div 
         initial={{ opacity: 0, y: 20, scale: 0.95 }}

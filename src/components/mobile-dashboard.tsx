@@ -442,6 +442,21 @@ export function MobileDashboard() {
     });
   }
 
+  function handleDeleteRequest(requestId: number) {
+    if (!window.confirm("Apakah Anda yakin ingin menolak & menghapus request pesanan ini selamanya?")) return;
+    startTransition(() => {
+      void (async () => {
+        try {
+          await api.deleteOrderRequest(requestId);
+          await refreshDashboard(false);
+          setNotice({ tone: "success", message: "Request pesanan berhasil dihapus/ditolak." });
+        } catch (error) {
+          setNotice({ tone: "error", message: (error as any)?.message || "Gagal menghapus request." });
+        }
+      })();
+    });
+  }
+
   function handleUpdateOrderStatus(orderId: number, status: "active" | "completed" | "cancelled") {
     startTransition(() => {
       void (async () => {
@@ -796,6 +811,13 @@ export function MobileDashboard() {
                         className="rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600 text-center flex-1"
                       >
                         Hubungi via WA
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteRequest(req.id)}
+                        className="rounded-full border border-rose-300 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 text-center flex-1"
+                      >
+                        Tolak
                       </button>
                       <button
                         type="button"

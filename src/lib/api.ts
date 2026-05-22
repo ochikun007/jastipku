@@ -470,4 +470,9 @@ export const api = {
     if (error) throw error;
     return data as OrderRequest;
   },
+
+  deleteOrderRequest: async (id: number): Promise<void> => {
+    const { error } = await supabase.from("order_requests").delete().eq("id", id);
+    if (error) throw error;
+  },
 };
