@@ -159,6 +159,7 @@ export function MobileDashboard() {
   const [editingStoreId, setEditingStoreId] = useState<number | null>(null);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [editingOrderId, setEditingOrderId] = useState<number | null>(null);
+  const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
   const toggleCategory = (category: string) => {
@@ -412,6 +413,13 @@ export function MobileDashboard() {
               })),
             });
             setActiveOrder(detail);
+
+            // Auto-link to customer request if this order came from "Proses Order Ini"
+            if (processingRequestId) {
+              await api.linkRequestToOrder(processingRequestId, detail.order.id);
+              setProcessingRequestId(null);
+            }
+
             setNotice({ tone: "success", message: "Order berhasil disimpan dan siap diunduh." });
           }
 
@@ -495,7 +503,8 @@ export function MobileDashboard() {
   }
 
   function handleProcessRequest(request: OrderRequest) {
-    // Auto-fill order form with request data
+    // Auto-fill order form with request data AND store request ID for linking
+    setProcessingRequestId(request.id);
     setOrderForm({
       customerName: request.customer_name || "",
       shippingCost: "0",

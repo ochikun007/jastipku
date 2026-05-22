@@ -79,6 +79,7 @@ CREATE TABLE order_requests (
     note TEXT,
     status TEXT NOT NULL DEFAULT 'waiting',
     tracking_status TEXT NOT NULL DEFAULT 'waiting',
+    tracking_timestamps JSONB NOT NULL DEFAULT '{}',
     linked_order_id BIGINT REFERENCES orders(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

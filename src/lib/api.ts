@@ -333,6 +333,7 @@ export const api = {
   },
 
   submitOrderRequest: async (code: string, input: SubmitOrderRequestInput): Promise<OrderRequest> => {
+    const now = new Date().toISOString();
     const { data, error } = await supabase
       .from("order_requests")
       .update({
@@ -344,9 +345,10 @@ export const api = {
         note: input.note || null,
         status: "pending",
         tracking_status: "pending",
+        tracking_timestamps: { pending: now },
       })
       .eq("request_code", code)
-      .eq("status", "waiting") // only allow if still waiting
+      .eq("status", "waiting")
       .select()
       .single();
     if (error) throw error;
@@ -354,7 +356,21 @@ export const api = {
   },
 
   updateTrackingStatus: async (id: number, tracking_status: TrackingStatus): Promise<OrderRequest> => {
-    const updates: Record<string, string> = { tracking_status };
+    // First read current timestamps
+    const { data: current } = await supabase
+      .from("order_requests")
+      .select("tracking_timestamps")
+      .eq("id", id)
+      .single();
+
+    const existingTimestamps = (current?.tracking_timestamps as Record<string, string>) || {};
+    const now = new Date().toISOString();
+    const mergedTimestamps = { ...existingTimestamps, [tracking_status]: now };
+
+    const updates: Record<string, unknown> = {
+      tracking_status,
+      tracking_timestamps: mergedTimestamps,
+    };
     if (tracking_status === "completed") {
       updates.status = "completed";
     } else if (tracking_status !== "waiting" && tracking_status !== "pending") {

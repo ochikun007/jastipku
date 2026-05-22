@@ -117,6 +117,7 @@ export type OrderRequest = {
   note: string | null;
   status: "waiting" | "pending" | "processing" | "completed";
   tracking_status: TrackingStatus;
+  tracking_timestamps: Record<string, string>;
   linked_order_id: number | null;
   created_at: string;
 };

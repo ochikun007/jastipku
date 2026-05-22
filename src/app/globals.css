@@ -391,7 +391,19 @@ select {
 .tracking-step-content {
   padding: 0.55rem 0 1.2rem;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
+}
+
+.tracking-step-time {
+  font-size: 0.7rem;
+  color: #b08770;
+  margin-top: 0.15rem;
+  font-weight: 500;
+}
+
+.tracking-step-content-done .tracking-step-time {
+  color: #8a6a56;
 }
 
 .tracking-step-content-done .tracking-step-label {

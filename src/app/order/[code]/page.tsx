@@ -146,9 +146,19 @@ function OrderForm({ code, onSubmitted }: { code: string; onSubmitted: (req: Ord
 }
 
 /* ─── Tracking View Component ─── */
+function formatTrackingTime(isoString: string): string {
+  try {
+    const d = new Date(isoString);
+    return d.toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+}
+
 function TrackingView({ request }: { request: OrderRequest }) {
   const currentIndex = getStepIndex(request.tracking_status);
   const isCompleted = request.tracking_status === "completed";
+  const timestamps = request.tracking_timestamps || {};
 
   return (
     <div className="order-page-container">
@@ -189,6 +199,7 @@ function TrackingView({ request }: { request: OrderRequest }) {
             {TRACKING_STEPS.map((step, index) => {
               const isDone = index <= currentIndex;
               const isActive = index === currentIndex;
+              const stepTime = timestamps[step.key];
 
               return (
                 <div key={step.key} className="tracking-step">
@@ -202,6 +213,9 @@ function TrackingView({ request }: { request: OrderRequest }) {
                   </div>
                   <div className={`tracking-step-content ${isDone ? "tracking-step-content-done" : ""} ${isActive ? "tracking-step-content-active" : ""}`}>
                     <span className="tracking-step-label">{step.label}</span>
+                    {isDone && stepTime && (
+                      <span className="tracking-step-time">{formatTrackingTime(stepTime)}</span>
+                    )}
                   </div>
                 </div>
               );
