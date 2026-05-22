@@ -377,4 +377,21 @@ export const api = {
       .eq("id", requestId);
     if (error) throw error;
   },
+
+  createTrackingForOrder: async (orderId: number, customerName: string): Promise<OrderRequest> => {
+    const request_code = generateCode(8);
+    const { data, error } = await supabase
+      .from("order_requests")
+      .insert({
+        request_code,
+        customer_name: customerName,
+        status: "processing",
+        tracking_status: "pending",
+        linked_order_id: orderId,
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return data as OrderRequest;
+  },
 };

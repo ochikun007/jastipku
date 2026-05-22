@@ -947,24 +947,42 @@ export function MobileDashboard() {
                           </button>
                         </div>
                       </div>
-                      {/* Tracking Controls — show if linked request exists */}
-                      {(() => {
+                      {/* Tracking Controls — selalu tampil di semua order aktif */}
+                      {order.status === "active" && (() => {
                         const linkedReq = orderRequests.find((r) => r.linked_order_id === order.id);
-                        if (!linkedReq || linkedReq.status === "completed") return null;
+                        const currentStatus = linkedReq?.tracking_status || "pending";
+                        const currentLabel = TRACKING_OPTIONS.find((t) => t.key === currentStatus)?.label || "Belum dimulai";
+
+                        async function onTrackClick(status: TrackingStatus) {
+                          if (linkedReq) {
+                            handleUpdateTracking(linkedReq.id, status);
+                          } else {
+                            // Auto-create tracking for this order
+                            try {
+                              const newReq = await api.createTrackingForOrder(order.id, order.customer_name);
+                              await api.updateTrackingStatus(newReq.id, status);
+                              await refreshDashboard(false);
+                              setNotice({ tone: "success", message: "Tracking berhasil dibuat dan diperbarui." });
+                            } catch (err) {
+                              setNotice({ tone: "error", message: (err as Error).message || "Gagal membuat tracking." });
+                            }
+                          }
+                        }
+
                         return (
                           <div className="mt-3 pt-3 border-t border-[#f2dfcf]">
                             <p className="text-xs font-semibold uppercase tracking-wider text-[#8a6a56] mb-2">
-                              📦 Status Pelacakan Pelanggan: <span className="text-[#cc6431]">{TRACKING_OPTIONS.find((t) => t.key === linkedReq.tracking_status)?.label}</span>
+                              📦 Pelacakan: <span className="text-[#cc6431]">{currentLabel}</span>
                             </p>
                             <div className="flex flex-wrap gap-1.5">
                               {TRACKING_OPTIONS.map((opt) => (
                                 <button
                                   key={opt.key}
                                   type="button"
-                                  disabled={isPending || opt.key === linkedReq.tracking_status}
-                                  onClick={() => handleUpdateTracking(linkedReq.id, opt.key)}
+                                  disabled={isPending || opt.key === currentStatus}
+                                  onClick={() => void onTrackClick(opt.key)}
                                   className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
-                                    opt.key === linkedReq.tracking_status
+                                    opt.key === currentStatus
                                       ? "bg-[#cc6431] text-white"
                                       : "bg-[#fff3e1] text-[#8a6a56] hover:bg-[#ffe5c7]"
                                   }`}
