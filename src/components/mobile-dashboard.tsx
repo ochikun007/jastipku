@@ -27,7 +27,7 @@ type TabId = "home" | "toko" | "produk" | "order" | "kas";
 import { InvoiceCard } from "@/components/invoice-card";
 import { api } from "@/lib/api";
 import { formatCurrency, formatDateTime } from "@/lib/format";
-import type { Store, LedgerEntry, Order, OrderDetail, Product, Summary, CreateProductInput } from "@/lib/types";
+import type { Store, LedgerEntry, Order, OrderDetail, OrderRequest, Product, Summary, CreateProductInput, TrackingStatus } from "@/lib/types";
 
 const EMPTY_SUMMARY: Summary = {
   total_income: 0,
@@ -38,15 +38,16 @@ const EMPTY_SUMMARY: Summary = {
 };
 
 async function fetchDashboardData() {
-  const [summary, stores, products, orders, ledgerEntries] = await Promise.all([
+  const [summary, stores, products, orders, ledgerEntries, orderRequests] = await Promise.all([
     api.getSummary(),
     api.getStores(),
     api.getProducts(),
     api.getOrders(),
     api.getLedger(),
+    api.getOrderRequests(),
   ]);
 
-  return { summary, stores, products, orders, ledgerEntries };
+  return { summary, stores, products, orders, ledgerEntries, orderRequests };
 }
 
 type NoticeState = {
@@ -118,8 +119,10 @@ export function MobileDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
+  const [orderRequests, setOrderRequests] = useState<OrderRequest[]>([]);
   const [summary, setSummary] = useState<Summary>(EMPTY_SUMMARY);
   const [activeOrder, setActiveOrder] = useState<OrderDetail | null>(null);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [storeForm, setStoreForm] = useState<StoreFormState>({
     name: "",
     category: "",
@@ -186,6 +189,7 @@ export function MobileDashboard() {
         setProducts(data.products);
         setOrders(data.orders);
         setLedgerEntries(data.ledgerEntries);
+        setOrderRequests(data.orderRequests);
       } catch (error) {
         if (cancelled) {
           return;
@@ -223,6 +227,7 @@ export function MobileDashboard() {
       setProducts(data.products);
       setOrders(data.orders);
       setLedgerEntries(data.ledgerEntries);
+      setOrderRequests(data.orderRequests);
     } catch (error) {
       setNotice({
         tone: "error",
@@ -466,6 +471,78 @@ export function MobileDashboard() {
     });
   }
 
+  function handleGenerateLink() {
+    startTransition(() => {
+      void (async () => {
+        try {
+          const req = await api.generateOrderRequest();
+          const link = `${window.location.origin}/order/${req.request_code}`;
+          setGeneratedLink(link);
+          await navigator.clipboard.writeText(link);
+          await refreshDashboard(false);
+          setNotice({
+            tone: "success",
+            message: "Link berhasil dibuat dan disalin ke clipboard!",
+          });
+        } catch (error) {
+          setNotice({
+            tone: "error",
+            message: (error as any)?.message || "Gagal membuat link.",
+          });
+        }
+      })();
+    });
+  }
+
+  function handleProcessRequest(request: OrderRequest) {
+    // Auto-fill order form with request data
+    setOrderForm({
+      customerName: request.customer_name || "",
+      shippingCost: "0",
+      note: `[REQUEST #${request.request_code}]\nPesanan: ${request.request_items || ""}\nToko: ${request.store_preferences || "-"}\nHP: ${request.customer_phone || "-"}${request.note ? `\nCatatan: ${request.note}` : ""}`,
+      shippingAddressLink: request.google_maps_link || "",
+    });
+    setActiveTab("order");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setNotice({
+      tone: "success",
+      message: `Data request ${request.customer_name} telah diisi otomatis ke form Order.`,
+    });
+  }
+
+  function handleUpdateTracking(requestId: number, trackingStatus: TrackingStatus) {
+    startTransition(() => {
+      void (async () => {
+        try {
+          await api.updateTrackingStatus(requestId, trackingStatus);
+          await refreshDashboard(false);
+          setNotice({
+            tone: "success",
+            message: `Status tracking berhasil diperbarui.`,
+          });
+        } catch (error) {
+          setNotice({
+            tone: "error",
+            message: (error as any)?.message || "Gagal memperbarui tracking.",
+          });
+        }
+      })();
+    });
+  }
+
+  const TRACKING_OPTIONS: { key: TrackingStatus; label: string }[] = [
+    { key: "pending", label: "Pesanan Dibuat" },
+    { key: "heading_to_store", label: "Menuju Toko" },
+    { key: "picking_up", label: "Mengambil Pesanan" },
+    { key: "ready_to_deliver", label: "Siap Antar" },
+    { key: "delivering", label: "Mengantar" },
+    { key: "arrived", label: "Sudah Sampai" },
+    { key: "completed", label: "Selesai" },
+  ];
+
+  const pendingRequests = orderRequests.filter((r) => r.status === "pending");
+  const processingRequests = orderRequests.filter((r) => r.status === "processing");
+
   function handleCreateLedgerEntry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -626,6 +703,127 @@ export function MobileDashboard() {
               </div>
             </div>
           </header>
+
+          {/* Generate Link Section */}
+          <SectionShell
+            icon={<BadgePlus className="h-5 w-5" />}
+            title="Link Order Pelanggan"
+            caption="Generate link unik untuk pelanggan agar mereka bisa langsung pesan lewat HP."
+          >
+            <button
+              type="button"
+              onClick={handleGenerateLink}
+              disabled={isPending}
+              className="action-button"
+            >
+              <BadgePlus className="h-4 w-4" />
+              Generate Link Baru
+            </button>
+            {generatedLink && (
+              <div className="mt-3 rounded-2xl bg-emerald-50 border border-emerald-200 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 mb-2">Link siap dikirim ke pelanggan:</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    readOnly
+                    value={generatedLink}
+                    className="flex-1 rounded-xl bg-white border border-emerald-200 px-3 py-2 text-sm text-emerald-900 font-mono"
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { void navigator.clipboard.writeText(generatedLink); setNotice({ tone: "success", message: "Link disalin!" }); }}
+                    className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition shrink-0"
+                  >
+                    Salin
+                  </button>
+                </div>
+              </div>
+            )}
+          </SectionShell>
+
+          {/* Pending Request Queue */}
+          {pendingRequests.length > 0 && (
+            <SectionShell
+              icon={<ReceiptText className="h-5 w-5" />}
+              title={`Antrian Request (${pendingRequests.length})`}
+              caption="Pesanan pelanggan yang masuk dari link. Klik 'Proses' untuk mengisi form order otomatis."
+            >
+              <div className="space-y-3">
+                {pendingRequests.map((req) => (
+                  <div key={req.id} className="rounded-[24px] border-2 border-amber-300 bg-amber-50 px-4 py-4">
+                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-200 text-amber-800">Baru</span>
+                      <p className="font-semibold text-[#2c1c14]">{req.customer_name}</p>
+                    </div>
+                    <p className="text-sm text-[#6d5549]">📱 {req.customer_phone}</p>
+                    {req.request_items && (
+                      <div className="mt-2 bg-white/60 rounded-xl p-3 border border-amber-200/50">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 mb-1">Pesanan:</p>
+                        <p className="text-sm text-[#4a332a] whitespace-pre-line">{req.request_items}</p>
+                      </div>
+                    )}
+                    {req.store_preferences && (
+                      <p className="mt-2 text-sm text-[#8a6a56]">🏪 Toko: {req.store_preferences}</p>
+                    )}
+                    {req.google_maps_link && (
+                      <a href={req.google_maps_link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-[#cc6431] hover:underline">
+                        📍 Lihat Lokasi
+                      </a>
+                    )}
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleProcessRequest(req)}
+                        className="flex-1 rounded-full bg-[#2d1d14] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1e140e] text-center"
+                      >
+                        Proses Order Ini
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SectionShell>
+          )}
+
+          {/* Processing Requests — Tracking Controls */}
+          {processingRequests.length > 0 && (
+            <SectionShell
+              icon={<ReceiptText className="h-5 w-5" />}
+              title={`Tracking Aktif (${processingRequests.length})`}
+              caption="Update status tracking agar pelanggan bisa melihat progres pesanan mereka."
+            >
+              <div className="space-y-3">
+                {processingRequests.map((req) => (
+                  <div key={req.id} className="rounded-[24px] border border-[#f2dfcf] bg-white px-4 py-4">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <p className="font-semibold text-[#2c1c14]">{req.customer_name}</p>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700">
+                        {TRACKING_OPTIONS.find((t) => t.key === req.tracking_status)?.label || req.tracking_status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-[#8a6a56] mb-3">📱 {req.customer_phone} • 🛒 {req.request_items?.split("\n")[0]}...</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TRACKING_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          disabled={isPending || opt.key === req.tracking_status}
+                          onClick={() => handleUpdateTracking(req.id, opt.key)}
+                          className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
+                            opt.key === req.tracking_status
+                              ? "bg-[#cc6431] text-white"
+                              : "bg-[#fff3e1] text-[#8a6a56] hover:bg-[#ffe5c7]"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SectionShell>
+          )}
 
           <SectionShell
             icon={<ReceiptText className="h-5 w-5" />}

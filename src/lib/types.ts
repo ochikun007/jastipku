@@ -95,3 +95,37 @@ export type CreateLedgerInput = {
   amount: number;
   happened_at?: string;
 };
+
+export type TrackingStatus =
+  | "waiting"
+  | "pending"
+  | "heading_to_store"
+  | "picking_up"
+  | "ready_to_deliver"
+  | "delivering"
+  | "arrived"
+  | "completed";
+
+export type OrderRequest = {
+  id: number;
+  request_code: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  google_maps_link: string | null;
+  request_items: string | null;
+  store_preferences: string | null;
+  note: string | null;
+  status: "waiting" | "pending" | "processing" | "completed";
+  tracking_status: TrackingStatus;
+  linked_order_id: number | null;
+  created_at: string;
+};
+
+export type SubmitOrderRequestInput = {
+  customer_name: string;
+  customer_phone: string;
+  google_maps_link?: string;
+  request_items: string;
+  store_preferences?: string;
+  note?: string;
+};

@@ -8,9 +8,23 @@ import type {
   Order,
   OrderDetail,
   OrderItem,
+  OrderRequest,
   Product,
+  SubmitOrderRequestInput,
   Summary,
+  TrackingStatus,
 } from "@/lib/types";
+
+function generateCode(length = 8): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  const arr = new Uint8Array(length);
+  crypto.getRandomValues(arr);
+  for (const byte of arr) {
+    result += chars[byte % chars.length];
+  }
+  return result;
+}
 
 export const api = {
   getSummary: async (): Promise<Summary> => {
@@ -279,6 +293,88 @@ export const api = {
     // Delete ledger entry first to keep consistency since it has ON DELETE SET NULL
     await supabase.from("ledger_entries").delete().eq("related_order_id", id);
     const { error } = await supabase.from("orders").delete().eq("id", id);
+    if (error) throw error;
+  },
+
+  // ─── ORDER REQUESTS (Link Pelanggan) ───
+
+  generateOrderRequest: async (): Promise<OrderRequest> => {
+    const request_code = generateCode(8);
+    const { data, error } = await supabase
+      .from("order_requests")
+      .insert({ request_code })
+      .select()
+      .single();
+    if (error) throw error;
+    return data as OrderRequest;
+  },
+
+  getOrderRequests: async (): Promise<OrderRequest[]> => {
+    const { data, error } = await supabase
+      .from("order_requests")
+      .select("*")
+      .order("id", { ascending: false })
+      .limit(30);
+    if (error) throw error;
+    return data as OrderRequest[];
+  },
+
+  getOrderRequestByCode: async (code: string): Promise<OrderRequest | null> => {
+    const { data, error } = await supabase
+      .from("order_requests")
+      .select("*")
+      .eq("request_code", code)
+      .single();
+    if (error) {
+      if (error.code === "PGRST116") return null; // not found
+      throw error;
+    }
+    return data as OrderRequest;
+  },
+
+  submitOrderRequest: async (code: string, input: SubmitOrderRequestInput): Promise<OrderRequest> => {
+    const { data, error } = await supabase
+      .from("order_requests")
+      .update({
+        customer_name: input.customer_name,
+        customer_phone: input.customer_phone,
+        google_maps_link: input.google_maps_link || null,
+        request_items: input.request_items,
+        store_preferences: input.store_preferences || null,
+        note: input.note || null,
+        status: "pending",
+        tracking_status: "pending",
+      })
+      .eq("request_code", code)
+      .eq("status", "waiting") // only allow if still waiting
+      .select()
+      .single();
+    if (error) throw error;
+    return data as OrderRequest;
+  },
+
+  updateTrackingStatus: async (id: number, tracking_status: TrackingStatus): Promise<OrderRequest> => {
+    const updates: Record<string, string> = { tracking_status };
+    if (tracking_status === "completed") {
+      updates.status = "completed";
+    } else if (tracking_status !== "waiting" && tracking_status !== "pending") {
+      updates.status = "processing";
+    }
+    const { data, error } = await supabase
+      .from("order_requests")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as OrderRequest;
+  },
+
+  linkRequestToOrder: async (requestId: number, orderId: number): Promise<void> => {
+    const { error } = await supabase
+      .from("order_requests")
+      .update({ linked_order_id: orderId, status: "processing" })
+      .eq("id", requestId);
     if (error) throw error;
   },
 };
