@@ -598,7 +598,7 @@ export function MobileDashboard() {
       const dataUrl = await toPng(invoiceRef.current, {
         cacheBust: true,
         pixelRatio: 2.5,
-        backgroundColor: "#fffaf4",
+        backgroundColor: "#f5f5f5",
       });
 
       const link = document.createElement("a");
