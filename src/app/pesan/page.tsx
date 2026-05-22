@@ -208,7 +208,8 @@ export default function PublicOrderPage() {
               ) : "🚀 Kirim Pesanan"}
             </motion.button>
           </motion.form>
-          </motion.div>
+        </div>
+        </motion.div>
         )}
       </AnimatePresence>
     </div>
