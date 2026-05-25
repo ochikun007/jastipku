@@ -276,9 +276,7 @@ export function MobileDashboard() {
     .filter((product) => product.quantity > 0);
 
   const existingOrder = editingOrderId ? orders.find((o) => o.id === editingOrderId) : null;
-  const subtotal = editingOrderId && existingOrder 
-    ? existingOrder.subtotal 
-    : selectedProducts.reduce((total, product) => total + product.price * product.quantity, 0);
+  const subtotal = selectedProducts.reduce((total, product) => total + product.price * product.quantity, 0);
 
   const shippingCost = Number(orderForm.shippingCost || 0);
   const estimatedTotal = subtotal + shippingCost;
@@ -402,7 +400,10 @@ export function MobileDashboard() {
               shipping_cost: Number(orderForm.shippingCost || 0),
               note: orderForm.note,
               shipping_address_link: orderForm.shippingAddressLink,
-              subtotal: existingOrder.subtotal,
+              items: selectedProducts.map((p) => ({
+                product_id: p.id,
+                quantity: p.quantity,
+              })),
             });
             setNotice({ tone: "success", message: "Order berhasil diperbarui." });
             setEditingOrderId(null);
@@ -960,6 +961,13 @@ export function MobileDashboard() {
                           type="button"
                           onClick={() => {
                             setEditingOrderId(order.id);
+                            const newQuantities: Record<number, number> = {};
+                            order.order_items?.forEach((item) => {
+                              if (item.product_id) {
+                                newQuantities[item.product_id] = item.quantity;
+                              }
+                            });
+                            setQuantities(newQuantities);
                             setOrderForm({
                               customerName: order.customer_name,
                               customerPhone: order.customer_phone || "",
@@ -1359,7 +1367,7 @@ export function MobileDashboard() {
             ) : (
               Object.entries(
                 products.reduce((acc, product) => {
-                  const category = product.category || 'Umum';
+                  const category = (product.category || 'Umum').trim().toUpperCase();
                   if (!acc[category]) acc[category] = [];
                   acc[category].push(product);
                   return acc;
@@ -1525,8 +1533,7 @@ export function MobileDashboard() {
               className="input-shell"
             />
 
-            {!editingOrderId && (
-              <div className="space-y-6">
+            <div className="space-y-6">
                 {products.length === 0 ? (
                   <p className="empty-state">
                     Tambahkan produk terlebih dulu sebelum membuat order.
@@ -1534,7 +1541,7 @@ export function MobileDashboard() {
                 ) : (
                   Object.entries(
                     products.reduce((acc, product) => {
-                      const category = product.category || 'Umum';
+                      const category = (product.category || 'Umum').trim().toUpperCase();
                       if (!acc[category]) acc[category] = [];
                       acc[category].push(product);
                       return acc;
@@ -1606,7 +1613,7 @@ export function MobileDashboard() {
                   ))
                 )}
               </div>
-            )}
+
               <div className="rounded-[28px] bg-[linear-gradient(145deg,rgba(255,171,94,0.1),rgba(241,92,74,0.1))] p-5 border border-[#ffab5e]/20">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm font-semibold text-[#8a6a56]">Subtotal Produk</span>

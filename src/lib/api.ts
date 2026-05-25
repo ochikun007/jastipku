@@ -243,19 +243,50 @@ export const api = {
     return data as Store;
   },
 
-  updateOrder: async (id: number, input: { customer_name: string; customer_phone?: string | null; shipping_cost: number; note?: string; shipping_address_link?: string | null; subtotal: number }): Promise<Order> => {
-    const total_amount = input.subtotal + input.shipping_cost;
-    
+  updateOrder: async (id: number, payload: CreateOrderInput): Promise<OrderDetail> => {
+    const productIds = payload.items.map((i) => i.product_id);
+    const { data: products, error: productsError } = await supabase
+      .from("products")
+      .select("*")
+      .in("id", productIds);
+
+    if (productsError) throw productsError;
+    if (!products || products.length === 0) throw new Error("Products not found");
+
+    const productMap = new Map<number, Product>(products.map((p) => [p.id, p]));
+
+    let subtotal = 0;
+    const itemsData = payload.items.map((item) => {
+      const product = productMap.get(item.product_id);
+      if (!product) throw new Error(`Produk dengan ID ${item.product_id} tidak ditemukan`);
+
+      const unit_price = item.unit_price ?? product.price;
+      const line_total = unit_price * item.quantity;
+      subtotal += line_total;
+
+      return {
+        order_id: id,
+        product_id: item.product_id,
+        product_name: product.name,
+        quantity: item.quantity,
+        unit_price,
+        line_total,
+      };
+    });
+
+    const total_amount = subtotal + payload.shipping_cost;
+
     // 1. Update order
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .update({
-        customer_name: input.customer_name,
-        customer_phone: input.customer_phone || null,
-        shipping_cost: input.shipping_cost,
+        customer_name: payload.customer_name,
+        customer_phone: payload.customer_phone || null,
+        shipping_cost: payload.shipping_cost,
+        subtotal,
         total_amount,
-        note: input.note || null,
-        shipping_address_link: input.shipping_address_link || null,
+        note: payload.note || null,
+        shipping_address_link: payload.shipping_address_link || null,
       })
       .eq("id", id)
       .select()
@@ -263,15 +294,29 @@ export const api = {
 
     if (orderError) throw orderError;
 
-    // 2. Update ledger entry for this order (Only Shipping Cost)
+    // 2. Delete old items
+    const { error: deleteItemsError } = await supabase
+      .from("order_items")
+      .delete()
+      .eq("order_id", id);
+    if (deleteItemsError) throw deleteItemsError;
+
+    // 3. Insert new items
+    const { data: insertedItems, error: itemsError } = await supabase
+      .from("order_items")
+      .insert(itemsData)
+      .select();
+    if (itemsError) throw itemsError;
+
+    // 4. Update ledger entry for this order (Only Shipping Cost)
     const { error: ledgerError } = await supabase
       .from("ledger_entries")
-      .update({ amount: input.shipping_cost, description: input.note || null })
+      .update({ amount: payload.shipping_cost, description: payload.note || null })
       .eq("related_order_id", id);
 
     if (ledgerError) throw ledgerError;
 
-    return order as Order;
+    return { order: order as Order, items: insertedItems as OrderItem[] };
   },
 
   updateOrderStatus: async (id: number, status: "active" | "completed" | "cancelled"): Promise<Order> => {

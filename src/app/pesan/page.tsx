@@ -72,7 +72,7 @@ export default function PublicOrderPage() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
               className="text-[#6d5549] text-base mb-10 leading-relaxed px-4"
             >
-              Titipin aja ke <strong className="text-[#cc6431]">Jstipku</strong>! Dari beli cemilan kesukaan sampai belanja harian, kami siap beliin dan antar sampai depan pintu. Kamu tinggal duduk manis! 🛋️✨
+              Titipin aja ke <strong className="text-[#cc6431]">Jstipku</strong>! Dari beli cemilan kesukaan sampai belanja harian, Jstipku siap beliin dan antar sampai depan pintu. Kamu tinggal duduk manis saja! 🛋️✨
             </motion.p>
             
             <motion.button
@@ -82,7 +82,7 @@ export default function PublicOrderPage() {
               onClick={() => setStarted(true)}
               className="w-full max-w-[280px] bg-[linear-gradient(135deg,#ffb347_0%,#ff8c61_48%,#f35b4b_100%)] text-white py-4 px-6 rounded-full font-bold text-lg shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2"
             >
-              Mulai Order 🚀
+              Mulai Order Sekarang 🚀
             </motion.button>
 
             <motion.div 
@@ -138,7 +138,7 @@ export default function PublicOrderPage() {
                 required
                 value={form.customerPhone}
                 onChange={(e) => setForm((c) => ({ ...c, customerPhone: e.target.value }))}
-                placeholder="08123456789"
+                placeholder="0912345678"
                 className="order-form-input w-full px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-2xl focus:border-[#cc6431] outline-none transition"
               />
             </motion.div>
