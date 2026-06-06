@@ -348,6 +348,7 @@ export const api = {
         description: payload.note || null,
         amount: payload.shipping_cost,
         related_order_id: id,
+        happened_at: order.created_at,
       });
     }
     if (totalProfit > 0) {
@@ -358,6 +359,7 @@ export const api = {
         description: "Margin laba dari harga jual produk",
         amount: totalProfit,
         related_order_id: id,
+        happened_at: order.created_at,
       });
     }
 
