@@ -994,9 +994,26 @@ export function MobileDashboard() {
                           </div>
                         )}
 
-                        <p className="mt-3 text-sm font-semibold text-[#8a6a56]">
-                          Total: <span className="text-[#cc6431]">{formatCurrency(order.total_amount)}</span> (Ongkir {formatCurrency(order.shipping_cost)})
-                        </p>
+                        {(() => {
+                          const orderProfit = order.order_items?.reduce((sum, item) => {
+                            const product = products.find((p) => p.id === item.product_id);
+                            const origPrice = item.original_unit_price || product?.original_price || 0;
+                            const itemProfit = (item.unit_price - origPrice) * item.quantity;
+                            return sum + (itemProfit > 0 ? itemProfit : 0);
+                          }, 0) || 0;
+                          return (
+                            <div className="mt-3">
+                              <p className="text-sm font-semibold text-[#8a6a56]">
+                                Total: <span className="text-[#cc6431]">{formatCurrency(order.total_amount)}</span> (Ongkir {formatCurrency(order.shipping_cost)})
+                              </p>
+                              {orderProfit > 0 && (
+                                <p className="mt-1 text-sm font-semibold text-emerald-600">
+                                  Laba Produk: {formatCurrency(orderProfit)}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {order.shipping_address_link && (
                           <div className="mt-3">
@@ -1167,9 +1184,26 @@ export function MobileDashboard() {
                           </div>
                         )}
 
-                        <p className="mt-3 text-sm font-semibold text-[#8a6a56]">
-                          Total: <span className="text-[#8a6a56]">{formatCurrency(order.total_amount)}</span>
-                        </p>
+                        {(() => {
+                          const orderProfit = order.order_items?.reduce((sum, item) => {
+                            const product = products.find((p) => p.id === item.product_id);
+                            const origPrice = item.original_unit_price || product?.original_price || 0;
+                            const itemProfit = (item.unit_price - origPrice) * item.quantity;
+                            return sum + (itemProfit > 0 ? itemProfit : 0);
+                          }, 0) || 0;
+                          return (
+                            <div className="mt-3">
+                              <p className="text-sm font-semibold text-[#8a6a56]">
+                                Total: <span className="text-[#8a6a56]">{formatCurrency(order.total_amount)}</span> (Ongkir {formatCurrency(order.shipping_cost)})
+                              </p>
+                              {orderProfit > 0 && (
+                                <p className="mt-1 text-sm font-semibold text-emerald-600">
+                                  Laba Produk: {formatCurrency(orderProfit)}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                       <div className="flex flex-col gap-2">
                         {order.status === 'cancelled' && (
@@ -1181,6 +1215,29 @@ export function MobileDashboard() {
                             Kembalikan Aktif
                           </button>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingOrderId(order.id);
+                            setOrderForm({
+                              customerName: order.customer_name,
+                              customerPhone: order.customer_phone || "",
+                              shippingCost: order.shipping_cost.toString(),
+                              note: order.note || "",
+                              shippingAddressLink: order.shipping_address_link || "",
+                            });
+                            const itemsMap: Record<number, number> = {};
+                            order.order_items?.forEach((i) => {
+                              if (i.product_id) itemsMap[i.product_id] = i.quantity;
+                            });
+                            setQuantities(itemsMap);
+                            setActiveTab("order");
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="rounded-full bg-orange-100 px-4 py-2 text-sm font-semibold text-orange-700 transition hover:bg-orange-200 text-center"
+                        >
+                          Edit
+                        </button>
                         <button
                           type="button"
                           onClick={() => void openInvoice(order.id)}
