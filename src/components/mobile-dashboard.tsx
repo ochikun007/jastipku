@@ -997,8 +997,8 @@ export function MobileDashboard() {
                         {(() => {
                           const orderProfit = order.order_items?.reduce((sum, item) => {
                             const product = products.find((p) => p.id === item.product_id);
-                            const origPrice = item.original_unit_price || product?.original_price || 0;
-                            const itemProfit = (item.unit_price - origPrice) * item.quantity;
+                            const origPrice = Number(item.original_unit_price) || Number(product?.original_price) || 0;
+                            const itemProfit = (Number(item.unit_price) - origPrice) * Number(item.quantity);
                             return sum + (itemProfit > 0 ? itemProfit : 0);
                           }, 0) || 0;
                           return (
@@ -1187,8 +1187,8 @@ export function MobileDashboard() {
                         {(() => {
                           const orderProfit = order.order_items?.reduce((sum, item) => {
                             const product = products.find((p) => p.id === item.product_id);
-                            const origPrice = item.original_unit_price || product?.original_price || 0;
-                            const itemProfit = (item.unit_price - origPrice) * item.quantity;
+                            const origPrice = Number(item.original_unit_price) || Number(product?.original_price) || 0;
+                            const itemProfit = (Number(item.unit_price) - origPrice) * Number(item.quantity);
                             return sum + (itemProfit > 0 ? itemProfit : 0);
                           }, 0) || 0;
                           return (

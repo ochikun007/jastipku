@@ -151,11 +151,11 @@ export const api = {
       const product = productMap.get(item.product_id);
       if (!product) throw new Error(`Produk dengan ID ${item.product_id} tidak ditemukan`);
 
-      const unit_price = item.unit_price ?? product.price;
-      const original_unit_price = product.original_price || 0;
-      const line_total = unit_price * item.quantity;
+      const unit_price = item.unit_price !== undefined ? Number(item.unit_price) : Number(product.price);
+      const original_unit_price = Number(product.original_price) || 0;
+      const line_total = unit_price * Number(item.quantity);
       subtotal += line_total;
-      totalProfit += (unit_price - original_unit_price) * item.quantity;
+      totalProfit += (unit_price - original_unit_price) * Number(item.quantity);
 
       return {
         product_id: item.product_id,
@@ -281,11 +281,11 @@ export const api = {
       const product = productMap.get(item.product_id);
       if (!product) throw new Error(`Produk dengan ID ${item.product_id} tidak ditemukan`);
 
-      const unit_price = item.unit_price ?? product.price;
-      const original_unit_price = product.original_price || 0;
-      const line_total = unit_price * item.quantity;
+      const unit_price = item.unit_price !== undefined ? Number(item.unit_price) : Number(product.price);
+      const original_unit_price = Number(product.original_price) || 0;
+      const line_total = unit_price * Number(item.quantity);
       subtotal += line_total;
-      totalProfit += (unit_price - original_unit_price) * item.quantity;
+      totalProfit += (unit_price - original_unit_price) * Number(item.quantity);
 
       return {
         order_id: id,
