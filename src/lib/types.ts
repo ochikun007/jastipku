@@ -12,6 +12,7 @@ export type Product = {
   name: string;
   category: string;
   price: number;
+  original_price: number;
   note: string | null;
   image_url: string | null;
   store_id: number | null;
@@ -30,6 +31,7 @@ export type Order = {
   shipping_address_link: string | null;
   status: "active" | "completed" | "cancelled";
   order_items?: OrderItem[];
+  order_requests?: OrderRequest[];
   created_at: string;
 };
 
@@ -40,6 +42,7 @@ export type OrderItem = {
   product_name: string;
   quantity: number;
   unit_price: number;
+  original_unit_price: number;
   line_total: number;
 };
 
@@ -72,6 +75,7 @@ export type CreateProductInput = {
   name: string;
   category: string;
   price: number;
+  original_price: number;
   note?: string;
   image_url?: string | null;
   store_id?: number | null;
@@ -133,4 +137,5 @@ export type SubmitOrderRequestInput = {
   request_items: string;
   store_preferences?: string;
   note?: string;
+  linked_order_id?: number;
 };

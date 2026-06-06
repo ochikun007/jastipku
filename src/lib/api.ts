@@ -108,9 +108,9 @@ export const api = {
   getOrders: async (): Promise<Order[]> => {
     const { data, error } = await supabase
       .from("orders")
-      .select("*, order_items(*)")
+      .select("*, order_items(*), order_requests(*)")
       .order("id", { ascending: false })
-      .limit(20);
+      .limit(100);
     if (error) throw error;
     return data as Order[];
   },
@@ -146,19 +146,23 @@ export const api = {
     const productMap = new Map<number, Product>(products.map((p) => [p.id, p]));
 
     let subtotal = 0;
+    let totalProfit = 0;
     const itemsData = payload.items.map((item) => {
       const product = productMap.get(item.product_id);
       if (!product) throw new Error(`Produk dengan ID ${item.product_id} tidak ditemukan`);
 
       const unit_price = item.unit_price ?? product.price;
+      const original_unit_price = product.original_price || 0;
       const line_total = unit_price * item.quantity;
       subtotal += line_total;
+      totalProfit += (unit_price - original_unit_price) * item.quantity;
 
       return {
         product_id: item.product_id,
         product_name: product.name,
         quantity: item.quantity,
         unit_price,
+        original_unit_price,
         line_total,
       };
     });
@@ -192,17 +196,33 @@ export const api = {
 
     if (itemsError) throw itemsError;
 
-    // 3. Insert ledger entry (Only Shipping Cost as Profit)
-    const { error: ledgerError } = await supabase.from("ledger_entries").insert({
-      entry_type: "income",
-      source: "order",
-      category: "Ongkos Kirim",
-      description: payload.note || null,
-      amount: payload.shipping_cost,
-      related_order_id: order.id,
-    });
+    // 3. Insert ledger entries
+    const ledgerEntries = [];
+    if (payload.shipping_cost > 0) {
+      ledgerEntries.push({
+        entry_type: "income",
+        source: "order",
+        category: "Ongkos Kirim",
+        description: payload.note || null,
+        amount: payload.shipping_cost,
+        related_order_id: order.id,
+      });
+    }
+    if (totalProfit > 0) {
+      ledgerEntries.push({
+        entry_type: "income",
+        source: "order",
+        category: "Laba Produk",
+        description: "Margin laba dari harga jual produk",
+        amount: totalProfit,
+        related_order_id: order.id,
+      });
+    }
 
-    if (ledgerError) throw ledgerError;
+    if (ledgerEntries.length > 0) {
+      const { error: ledgerError } = await supabase.from("ledger_entries").insert(ledgerEntries);
+      if (ledgerError) throw ledgerError;
+    }
 
     return { order: order as Order, items: insertedItems as OrderItem[] };
   },
@@ -213,7 +233,7 @@ export const api = {
       .select("*")
       .order("happened_at", { ascending: false })
       .order("id", { ascending: false })
-      .limit(30);
+      .limit(100);
     if (error) throw error;
     return data as LedgerEntry[];
   },
@@ -256,13 +276,16 @@ export const api = {
     const productMap = new Map<number, Product>(products.map((p) => [p.id, p]));
 
     let subtotal = 0;
+    let totalProfit = 0;
     const itemsData = payload.items.map((item) => {
       const product = productMap.get(item.product_id);
       if (!product) throw new Error(`Produk dengan ID ${item.product_id} tidak ditemukan`);
 
       const unit_price = item.unit_price ?? product.price;
+      const original_unit_price = product.original_price || 0;
       const line_total = unit_price * item.quantity;
       subtotal += line_total;
+      totalProfit += (unit_price - original_unit_price) * item.quantity;
 
       return {
         order_id: id,
@@ -270,6 +293,7 @@ export const api = {
         product_name: product.name,
         quantity: item.quantity,
         unit_price,
+        original_unit_price,
         line_total,
       };
     });
@@ -308,13 +332,39 @@ export const api = {
       .select();
     if (itemsError) throw itemsError;
 
-    // 4. Update ledger entry for this order (Only Shipping Cost)
-    const { error: ledgerError } = await supabase
+    // 4. Update ledger entry for this order (Re-create them)
+    const { error: deleteLedgerError } = await supabase
       .from("ledger_entries")
-      .update({ amount: payload.shipping_cost, description: payload.note || null })
+      .delete()
       .eq("related_order_id", id);
+    if (deleteLedgerError) throw deleteLedgerError;
 
-    if (ledgerError) throw ledgerError;
+    const ledgerEntries = [];
+    if (payload.shipping_cost > 0) {
+      ledgerEntries.push({
+        entry_type: "income",
+        source: "order",
+        category: "Ongkos Kirim",
+        description: payload.note || null,
+        amount: payload.shipping_cost,
+        related_order_id: id,
+      });
+    }
+    if (totalProfit > 0) {
+      ledgerEntries.push({
+        entry_type: "income",
+        source: "order",
+        category: "Laba Produk",
+        description: "Margin laba dari harga jual produk",
+        amount: totalProfit,
+        related_order_id: id,
+      });
+    }
+
+    if (ledgerEntries.length > 0) {
+      const { error: ledgerError } = await supabase.from("ledger_entries").insert(ledgerEntries);
+      if (ledgerError) throw ledgerError;
+    }
 
     return { order: order as Order, items: insertedItems as OrderItem[] };
   },
@@ -402,9 +452,10 @@ export const api = {
         request_items: input.request_items,
         store_preferences: input.store_preferences || null,
         note: input.note || null,
-        status: "pending",
-        tracking_status: "pending",
-        tracking_timestamps: { pending: now.toISOString() },
+        status: input.linked_order_id ? "processing" : "pending",
+        tracking_status: input.linked_order_id ? "accepted" : "pending",
+        tracking_timestamps: { pending: now.toISOString(), accepted: input.linked_order_id ? now.toISOString() : undefined },
+        linked_order_id: input.linked_order_id || null,
       })
       .select()
       .single();

@@ -68,6 +68,7 @@ type ProductFormState = {
   name: string;
   category: string;
   price: string;
+  originalPrice: string;
   note: string;
   storeId: string;
   imageFile: File | null;
@@ -136,6 +137,7 @@ export function MobileDashboard() {
     name: "",
     category: "",
     price: "",
+    originalPrice: "",
     note: "",
     storeId: "",
     imageFile: null,
@@ -165,6 +167,52 @@ export function MobileDashboard() {
   const [editingOrderId, setEditingOrderId] = useState<number | null>(null);
   const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "yesterday" | "week" | "month">("all");
+
+  const filterDate = (dateString: string) => {
+    if (dateFilter === "all") return true;
+    const date = new Date(dateString);
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    if (dateFilter === "today") {
+      return date >= startOfToday;
+    }
+    if (dateFilter === "yesterday") {
+      const startOfYesterday = new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000);
+      return date >= startOfYesterday && date < startOfToday;
+    }
+    if (dateFilter === "week") {
+      const startOfWeek = new Date(startOfToday);
+      startOfWeek.setDate(startOfToday.getDate() - startOfToday.getDay());
+      return date >= startOfWeek;
+    }
+    if (dateFilter === "month") {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      return date >= startOfMonth;
+    }
+    return true;
+  };
+
+  const filteredOrders = orders.filter((o) => filterDate(o.created_at));
+  const filteredLedgerEntries = ledgerEntries.filter((l) => filterDate(l.happened_at));
+
+  let filteredSummary = summary;
+  if (dateFilter !== "all") {
+    let income = 0;
+    let expense = 0;
+    filteredLedgerEntries.forEach((l) => {
+      if (l.entry_type === "income") income += l.amount;
+      if (l.entry_type === "expense") expense += l.amount;
+    });
+    filteredSummary = {
+      ...summary,
+      total_income: income,
+      total_expense: expense,
+      balance: income - expense,
+      total_orders: filteredOrders.length,
+    };
+  }
 
   const toggleCategory = (category: string) => {
     setCollapsedCategories(prev => ({ ...prev, [category]: !prev[category] }));
@@ -329,6 +377,7 @@ export function MobileDashboard() {
             name: productForm.name,
             category: productForm.category,
             price: Number(productForm.price || 0),
+            original_price: Number(productForm.originalPrice || 0),
             note: productForm.note,
             store_id: productForm.storeId ? Number(productForm.storeId) : null,
           };
@@ -346,7 +395,7 @@ export function MobileDashboard() {
             setNotice({ tone: "success", message: "Produk baru berhasil ditambahkan." });
           }
 
-          setProductForm({ name: "", category: "", price: "", note: "", storeId: "", imageFile: null });
+          setProductForm({ name: "", category: "", price: "", originalPrice: "", note: "", storeId: "", imageFile: null });
           await refreshDashboard();
         } catch (error) {
           setNotice({
@@ -425,6 +474,16 @@ export function MobileDashboard() {
             if (processingRequestId) {
               await api.linkRequestToOrder(processingRequestId, detail.order.id);
               setProcessingRequestId(null);
+            } else {
+              // Create a dummy OrderRequest for tracking
+              await api.createDirectOrderRequest({
+                customer_name: orderForm.customerName,
+                customer_phone: orderForm.customerPhone || "",
+                request_items: "Pemesanan dibuat oleh Admin",
+                google_maps_link: orderForm.shippingAddressLink,
+                note: orderForm.note,
+                linked_order_id: detail.order.id,
+              });
             }
 
             setNotice({ tone: "success", message: "Order berhasil disimpan dan siap diunduh." });
@@ -652,8 +711,8 @@ export function MobileDashboard() {
     { id: "kas", label: "Kas", icon: <BookOpenText className="h-5 w-5" /> },
   ];
 
-  const activeOrders = orders.filter((o) => o.status !== "completed" && o.status !== "cancelled");
-  const completedOrders = orders.filter((o) => o.status === "completed" || o.status === "cancelled");
+  const activeOrders = filteredOrders.filter((o) => o.status !== "completed" && o.status !== "cancelled");
+  const completedOrders = filteredOrders.filter((o) => o.status === "completed" || o.status === "cancelled");
 
   return (
     <main className="relative mx-auto flex min-h-screen w-full max-w-[460px] flex-col px-4 pb-28 pt-5 text-[#2f2118] sm:px-6">
@@ -710,13 +769,27 @@ export function MobileDashboard() {
               </div>
             </div>
 
+            <div className="mt-4">
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value as any)}
+                className="w-full appearance-none rounded-full bg-white/20 px-4 py-2.5 text-sm font-semibold text-white outline-none backdrop-blur placeholder:text-white/60 focus:bg-white/30 focus:ring-2 focus:ring-white/40"
+              >
+                <option className="text-black" value="today">Hari Ini</option>
+                <option className="text-black" value="yesterday">Kemarin</option>
+                <option className="text-black" value="week">Minggu Ini</option>
+                <option className="text-black" value="month">Bulan Ini</option>
+                <option className="text-black" value="all">Semua Waktu</option>
+              </select>
+            </div>
+
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-[28px] bg-white/18 p-4 backdrop-blur">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/70">
-                  Laba (Ongkir)
+                  Laba (Ongkir + Produk)
                 </p>
                 <p className="mt-2 font-[family:var(--font-display)] text-2xl font-semibold">
-                  {formatCurrency(summary.balance)}
+                  {formatCurrency(filteredSummary.balance)}
                 </p>
               </div>
               <div className="rounded-[28px] bg-[#2f190f]/26 p-4 backdrop-blur">
@@ -724,23 +797,23 @@ export function MobileDashboard() {
                   Order
                 </p>
                 <p className="mt-2 font-[family:var(--font-display)] text-3xl font-semibold">
-                  {summary.total_orders}
+                  {filteredSummary.total_orders}
                 </p>
               </div>
               <div className="rounded-[28px] bg-white/18 p-4 backdrop-blur">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/70">
-                  Masuk
+                  Total Income
                 </p>
-                <p className="mt-2 text-lg font-semibold">
-                  {formatCurrency(summary.total_income)}
+                <p className="mt-1 font-[family:var(--font-display)] text-xl font-semibold text-[#8bfdb5]">
+                  {formatCurrency(filteredSummary.total_income)}
                 </p>
               </div>
-              <div className="rounded-[28px] bg-white/18 p-4 backdrop-blur">
+              <div className="rounded-[28px] bg-[#2f190f]/26 p-4 backdrop-blur">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/70">
-                  Keluar
+                  Total Expense
                 </p>
-                <p className="mt-2 text-lg font-semibold">
-                  {formatCurrency(summary.total_expense)}
+                <p className="mt-1 font-[family:var(--font-display)] text-xl font-semibold text-[#ffa1a1]">
+                  {formatCurrency(filteredSummary.total_expense)}
                 </p>
               </div>
             </div>
@@ -992,7 +1065,9 @@ export function MobileDashboard() {
                         <button
                           type="button"
                           onClick={() => {
-                            const waLink = `https://wa.me/${order.customer_phone ? order.customer_phone.replace(/^0/, "62") : ""}?text=${encodeURIComponent(`Halo ${order.customer_name}, pesanan Jastip kamu sedang diproses! Pantau posisinya secara live di sini: https://jstipku.online/order/${order.id}`)}`;
+                            const trackingCode = order.order_requests?.[0]?.request_code || "";
+                            const trackingUrl = trackingCode ? `https://jstipku.online/order/${trackingCode}` : `https://jstipku.online/`;
+                            const waLink = `https://wa.me/${order.customer_phone ? order.customer_phone.replace(/^0/, "62") : ""}?text=${encodeURIComponent(`Halo ${order.customer_name}, pesanan Jastip kamu sedang diproses! Pantau posisinya secara live di sini: ${trackingUrl}`)}`;
                             window.open(waLink, "_blank");
                           }}
                           className="rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 text-center flex items-center justify-center gap-2"
@@ -1286,11 +1361,24 @@ export function MobileDashboard() {
                     price: event.target.value,
                   }))
                 }
-                placeholder="Harga"
+                placeholder="Harga Customer"
                 type="number"
                 min="0"
                 className="input-shell"
                 required
+              />
+              <input
+                value={productForm.originalPrice}
+                onChange={(event) =>
+                  setProductForm((current) => ({
+                    ...current,
+                    originalPrice: event.target.value,
+                  }))
+                }
+                placeholder="Harga Asli"
+                type="number"
+                min="0"
+                className="input-shell"
               />
               <select
                 value={productForm.storeId}
@@ -1350,7 +1438,7 @@ export function MobileDashboard() {
                 type="button"
                 onClick={() => {
                   setEditingProductId(null);
-                  setProductForm({ name: "", category: "", price: "", note: "", storeId: "", imageFile: null });
+                  setProductForm({ name: "", category: "", price: "", originalPrice: "", note: "", storeId: "", imageFile: null });
                 }}
                 className="w-full mt-2 rounded-full border border-[#cc6431] py-3 text-sm font-semibold text-[#cc6431] transition hover:bg-[#fff1e8]"
               >
@@ -1428,6 +1516,7 @@ export function MobileDashboard() {
                                   name: product.name,
                                   category: product.category || "",
                                   price: product.price.toString(),
+                                  originalPrice: product.original_price?.toString() || "",
                                   note: product.note || "",
                                   storeId: product.store_id ? product.store_id.toString() : "",
                                   imageFile: null,
@@ -1725,12 +1814,12 @@ export function MobileDashboard() {
           </form>
 
           <div className="space-y-3">
-            {ledgerEntries.length === 0 ? (
+            {filteredLedgerEntries.length === 0 ? (
               <p className="empty-state">
                 Belum ada catatan kas. Order baru otomatis menjadi pemasukan.
               </p>
             ) : (
-              ledgerEntries.map((entry) => (
+              filteredLedgerEntries.map((entry) => (
                 <div
                   key={entry.id}
                   className="flex items-start justify-between gap-4 rounded-[24px] border border-[#f2dfcf] bg-white px-4 py-4"
