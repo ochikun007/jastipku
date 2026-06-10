@@ -41,7 +41,27 @@ export default function PublicOrderPage() {
   }
 
   return (
-    <div className="order-page-container min-h-screen flex justify-center py-8 px-4 relative overflow-hidden bg-[#fffaf7]">
+    <div className="order-page-container min-h-screen flex justify-center py-12 px-4 relative overflow-hidden bg-[#fffaf7]">
+      {/* RUNNING BANNER (MARQUEE) */}
+      <div className="absolute top-0 left-0 w-full bg-[#cc6431] text-white py-2 z-50 overflow-hidden flex whitespace-nowrap shadow-md">
+        <motion.div
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+          className="flex shrink-0 w-max"
+        >
+          {/* We repeat the content a few times to ensure it covers wide screens and loops smoothly */}
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex gap-8 px-4">
+              <span className="flex items-center gap-2">🛵 <span className="font-semibold tracking-wide">Jstipku Siap Antar!</span></span>
+              <span className="flex items-center gap-2">⚡ <span className="font-semibold tracking-wide">Pengiriman Cepat</span></span>
+              <span className="flex items-center gap-2">💰 <span className="font-semibold tracking-wide">Bayar Tunai di Tempat</span></span>
+              <span className="flex items-center gap-2">🍔 <span className="font-semibold tracking-wide">Apapun Kebutuhanmu!</span></span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+
       <AnimatePresence mode="wait">
         {!started ? (
           <motion.div
@@ -53,9 +73,13 @@ export default function PublicOrderPage() {
             className="flex flex-col justify-center items-center text-center w-full max-w-md my-auto"
           >
             <motion.div 
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1, y: [0, -12, 0] }}
+              transition={{ 
+                scale: { type: "spring", stiffness: 200, delay: 0.2 },
+                opacity: { delay: 0.2 },
+                y: { repeat: Infinity, duration: 3, ease: "easeInOut", delay: 0.5 } 
+              }}
               className="w-40 h-40 rounded-full shadow-lg shadow-orange-100 mb-6 overflow-hidden bg-white flex items-center justify-center"
             >
               <img src="/logo.png" alt="Jstipku Logo" className="w-full h-full object-cover" />
@@ -102,9 +126,13 @@ export default function PublicOrderPage() {
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="order-page-card w-full max-w-xl p-6 sm:p-8 relative z-10"
           >
-        <div className="order-page-header text-center mb-6">
-          <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover" />
-        </div>
+        <motion.div 
+          className="order-page-header text-center mb-6"
+          animate={{ y: [0, -5, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        >
+          <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover max-w-[200px] mx-auto rounded-full shadow-lg shadow-orange-100" />
+        </motion.div>
 
         <div className="order-page-body">
           <h2 className="order-form-heading text-2xl font-bold text-[#2c1c14] mb-2 font-[family:var(--font-display)] text-center">Buat Pesanan Anda</h2>
