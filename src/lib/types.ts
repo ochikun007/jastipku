@@ -127,6 +127,8 @@ export type OrderRequest = {
   tracking_status: TrackingStatus;
   tracking_timestamps: Record<string, string>;
   linked_order_id: number | null;
+  review_rating?: number | null;
+  review_text?: string | null;
   created_at: string;
 };
 

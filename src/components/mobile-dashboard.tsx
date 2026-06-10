@@ -1171,6 +1171,23 @@ export function MobileDashboard() {
                           {formatDateTime(order.created_at)}
                         </p>
 
+                        {/* REVIEW BADGE */}
+                        {order.order_requests && order.order_requests.length > 0 && order.order_requests[0].review_rating && (
+                          <div className="mt-2 bg-white/60 border border-[#f2dfcf]/70 rounded-xl p-2 flex flex-col gap-1">
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <span key={star} className="text-sm" style={{ color: star <= order.order_requests![0].review_rating! ? "#ffb347" : "#e6d8cf" }}>
+                                  ★
+                                </span>
+                              ))}
+                              <span className="text-xs font-semibold text-[#8a6a56] ml-1">Rating Customer</span>
+                            </div>
+                            {order.order_requests[0].review_text && (
+                              <p className="text-xs text-[#6d5549] italic">"{order.order_requests[0].review_text}"</p>
+                            )}
+                          </div>
+                        )}
+
                         {order.order_items && order.order_items.length > 0 && (
                           <div className="mt-3 bg-white/50 rounded-xl p-3 border border-[#f2dfcf]/50">
                             <ul className="space-y-1">

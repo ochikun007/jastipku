@@ -573,4 +573,15 @@ export const api = {
     const { error } = await supabase.from("order_requests").delete().eq("id", id);
     if (error) throw error;
   },
+
+  submitOrderReview: async (code: string, rating: number, text: string): Promise<OrderRequest> => {
+    const { data, error } = await supabase
+      .from("order_requests")
+      .update({ review_rating: rating, review_text: text || null })
+      .eq("request_code", code)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as OrderRequest;
+  },
 };

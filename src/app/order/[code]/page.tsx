@@ -200,6 +200,12 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
   const [refreshing, setRefreshing] = useState(false);
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
 
+  // Review states
+  const [rating, setRating] = useState(request.review_rating || 0);
+  const [reviewText, setReviewText] = useState(request.review_text || "");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(!!request.review_rating);
+
   useEffect(() => {
     // 4 is the index for "ready_to_deliver" (Pesanan Siap Antar)
     if (currentIndex >= 4 && request.linked_order_id) {
@@ -213,6 +219,20 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
     setRefreshing(true);
     onRefresh();
     setTimeout(() => setRefreshing(false), 800);
+  }
+
+  async function handleSubmitReview() {
+    if (rating === 0) return;
+    setSubmittingReview(true);
+    try {
+      await api.submitOrderReview(request.request_code, rating, reviewText);
+      setReviewSubmitted(true);
+      onRefresh(); // refresh the main state to save it
+    } catch (err) {
+      alert("Gagal mengirim ulasan: " + (err as Error).message);
+    } finally {
+      setSubmittingReview(false);
+    }
   }
 
   return (
@@ -348,16 +368,70 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
             </motion.div>
           )}
 
-          {/* Completion message */}
+          {/* Completion message & Review Section */}
           {isCompleted && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5, type: "spring" }}
-              className="tracking-complete-msg"
+              className="mt-6 border border-[#f2dfcf] bg-white/80 rounded-[28px] p-6 shadow-sm text-center"
             >
-              <p className="tracking-complete-title">Terima kasih sudah menggunakan jasa <strong>Jstipku</strong>! 🧡</p>
-              <p className="tracking-complete-sub">Jangan lupa order lagi ya!</p>
+              <div className="text-4xl mb-3">🎉</div>
+              <p className="text-xl font-bold text-[#2c1c14] mb-2 font-[family:var(--font-display)]">Pesanan Selesai!</p>
+              <p className="text-[#8a6a56] text-sm mb-6">Terima kasih sudah menggunakan jasa <strong>Jstipku</strong>. Jangan lupa order lagi ya! 🧡</p>
+              
+              <div className="border-t border-[#f2dfcf]/50 pt-5 mt-2">
+                <p className="font-semibold text-[#4a3525] mb-3">Bagaimana pelayanan kami?</p>
+                
+                {reviewSubmitted ? (
+                  <div className="bg-[#fffaf6] rounded-xl p-4 border border-[#f2dfcf]">
+                    <div className="flex justify-center gap-1 mb-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span key={star} className="text-2xl" style={{ color: star <= (request.review_rating || rating) ? "#ffb347" : "#e6d8cf" }}>
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    {(request.review_text || reviewText) && (
+                      <p className="text-sm text-[#6d5549] italic mt-2">"{request.review_text || reviewText}"</p>
+                    )}
+                    <p className="text-xs text-emerald-600 font-semibold mt-3">✓ Ulasan telah dikirim. Terima kasih!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-center gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setRating(star)}
+                          className="text-3xl transition-transform hover:scale-110 active:scale-95"
+                          style={{ color: star <= rating ? "#ffb347" : "#e6d8cf" }}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                    {rating > 0 && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-3">
+                        <textarea
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="Tulis ulasan Anda (opsional)..."
+                          className="w-full text-sm px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-xl focus:border-[#cc6431] outline-none transition resize-none"
+                          rows={3}
+                        />
+                        <button
+                          onClick={() => void handleSubmitReview()}
+                          disabled={submittingReview}
+                          className="w-full bg-[#cc6431] text-white font-bold py-3 rounded-xl disabled:opacity-50"
+                        >
+                          {submittingReview ? "Mengirim..." : "Kirim Ulasan"}
+                        </button>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 
