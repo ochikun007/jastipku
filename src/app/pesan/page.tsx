@@ -57,9 +57,17 @@ export default function PublicOrderPage() {
   }
 
   return (
-    <div className="order-page-container min-h-screen flex justify-center py-12 px-4 relative overflow-hidden bg-[#fffaf7] pb-20">
+    <div className="order-page-container min-h-screen flex justify-center pt-20 pb-28 px-4 relative overflow-hidden bg-[#fffaf7]">
+      {/* BACKGROUND FLOATING EMOJIS */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <motion.div animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="absolute top-[20%] left-[10%] text-6xl opacity-[0.03]">🍔</motion.div>
+        <motion.div animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }} className="absolute top-[60%] left-[15%] text-5xl opacity-[0.03]">🥤</motion.div>
+        <motion.div animate={{ y: [0, -25, 0], rotate: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} className="absolute top-[30%] right-[10%] text-6xl opacity-[0.03]">🛍️</motion.div>
+        <motion.div animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.5 }} className="absolute top-[70%] right-[15%] text-5xl opacity-[0.03]">🎁</motion.div>
+      </div>
+
       {/* RUNNING BANNER (MARQUEE) */}
-      <div className="absolute top-0 left-0 w-full bg-[#cc6431] text-white py-2 z-50 overflow-hidden flex whitespace-nowrap shadow-md">
+      <div className="fixed top-0 left-0 w-full bg-[#cc6431] text-white py-2 z-50 overflow-hidden flex whitespace-nowrap shadow-md">
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
           transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
@@ -116,11 +124,17 @@ export default function PublicOrderPage() {
             </motion.p>
             
             <motion.button
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, type: "spring" }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0, scale: [1, 1.05, 1] }} 
+              transition={{ 
+                delay: 0.5, 
+                type: "spring",
+                scale: { repeat: Infinity, duration: 2, ease: "easeInOut", delay: 1 }
+              }}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setStarted(true)}
-              className="w-full max-w-[280px] bg-[linear-gradient(135deg,#ffb347_0%,#ff8c61_48%,#f35b4b_100%)] text-white py-4 px-6 rounded-full font-bold text-lg shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2"
+              className="w-full max-w-[280px] bg-[linear-gradient(135deg,#ffb347_0%,#ff8c61_48%,#f35b4b_100%)] text-white py-4 px-6 rounded-full font-bold text-lg shadow-xl shadow-orange-500/30 flex items-center justify-center gap-2 relative z-10"
             >
               Mulai Order Sekarang 🚀
             </motion.button>
@@ -264,7 +278,9 @@ export default function PublicOrderPage() {
             </motion.div>
 
             <motion.button 
-              whileHover={{ scale: 1.02 }}
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               type="submit" 
               disabled={submitting} 
@@ -284,7 +300,7 @@ export default function PublicOrderPage() {
       </AnimatePresence>
 
       {/* MOTORCYCLE ASPHALT ANIMATION */}
-      <div className="absolute bottom-0 left-0 w-full h-12 bg-[#333] z-40 flex items-center overflow-hidden">
+      <div className="fixed bottom-0 left-0 w-full h-14 bg-[#333] z-[60] flex items-center overflow-hidden shadow-[0_-4px_10px_rgba(0,0,0,0.1)]">
         {/* Road dashes */}
         <div className="absolute top-1/2 w-full flex justify-between px-2 opacity-60">
           {[...Array(20)].map((_, i) => (
