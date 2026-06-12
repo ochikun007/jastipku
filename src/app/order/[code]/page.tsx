@@ -519,7 +519,7 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
         {/* Google Maps & WhatsApp link */}
         <div className="flex gap-3 mb-4">
           <a
-            href={`https://wa.me/628123456789?text=Halo%20Admin%20Jstipku,%20saya%20pelanggan%20dengan%20nomor%20pesanan%20${request.order_number || request.request_code}.`}
+            href={`https://wa.me/886974164100?text=Halo%20Admin%20Jstipku,%20saya%20pelanggan%20dengan%20nomor%20pesanan%20${request.order_number || request.request_code}.`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-1 items-center justify-center gap-2 rounded-[20px] bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-lg shadow-emerald-500/25 px-4 py-4 text-[15px] font-bold text-white active:scale-[0.98] transition-transform"
