@@ -103,19 +103,17 @@ export default function PublicOrderPage() {
     <div className="order-page-container min-h-screen flex justify-center pt-20 pb-28 px-4 relative overflow-hidden bg-gradient-to-br from-[#fff1eb] via-[#fffaf7] to-[#ffece6]">
       {/* GLOWING MESH BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#ffb347] opacity-[0.08] blur-[100px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#f35b4b] opacity-[0.06] blur-[120px]"></div>
-        
         {/* BACKGROUND FLOATING EMOJIS */}
-        <motion.div animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="absolute top-[20%] left-[10%] text-6xl opacity-[0.04]">🍔</motion.div>
-        <motion.div animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }} className="absolute top-[60%] left-[15%] text-5xl opacity-[0.04]">🥤</motion.div>
-        <motion.div animate={{ y: [0, -25, 0], rotate: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} className="absolute top-[30%] right-[10%] text-6xl opacity-[0.04]">🛍️</motion.div>
-        <motion.div animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.5 }} className="absolute top-[70%] right-[15%] text-5xl opacity-[0.04]">🎁</motion.div>
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="absolute top-[20%] left-[10%] text-6xl opacity-[0.04]">🍔</motion.div>
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }} className="absolute top-[60%] left-[15%] text-5xl opacity-[0.04]">🥤</motion.div>
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, -25, 0], rotate: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} className="absolute top-[30%] right-[10%] text-6xl opacity-[0.04]">🛍️</motion.div>
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.5 }} className="absolute top-[70%] right-[15%] text-5xl opacity-[0.04]">🎁</motion.div>
       </div>
 
       {/* RUNNING BANNER (MARQUEE) */}
       <div className="fixed top-0 left-0 w-full bg-[#cc6431] text-white py-2 z-50 overflow-hidden flex whitespace-nowrap shadow-md">
         <motion.div
+          style={{ willChange: "transform" }}
           animate={{ x: ["0%", "-50%"] }}
           transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
           className="flex shrink-0 w-max"
@@ -362,6 +360,7 @@ export default function PublicOrderPage() {
         </div>
         {/* Moving Motorcycle */}
         <motion.div
+          style={{ willChange: "transform" }}
           animate={{ x: ["-10vw", "110vw"] }}
           transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
           className="relative text-3xl z-10 flex items-center"
