@@ -6,6 +6,49 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 import type { OrderRequest } from "@/lib/types";
 
+const TYPEWRITER_TEXTS = [
+  "Lagi Mager Keluar? 🛋️",
+  "Pengen Jajan tapi Panas? ☀️",
+  "Butuh Sesuatu Cepat? ⚡",
+  "Biar Jastipku Aja! 🛵"
+];
+
+function TypewriterEffect() {
+  const [textIndex, setTextIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentText = TYPEWRITER_TEXTS[textIndex];
+    let typingSpeed = 80; // slightly faster typing
+    let active = true;
+
+    if (isDeleting) typingSpeed = 40;
+
+    const handleType = () => {
+      if (!active) return;
+      if (!isDeleting && displayedText === currentText) {
+        setTimeout(() => active && setIsDeleting(true), 2000);
+      } else if (isDeleting && displayedText === "") {
+        setIsDeleting(false);
+        setTextIndex((prev) => (prev + 1) % TYPEWRITER_TEXTS.length);
+      } else {
+        setDisplayedText(currentText.substring(0, displayedText.length + (isDeleting ? -1 : 1)));
+      }
+    };
+
+    const timer = setTimeout(handleType, typingSpeed);
+    return () => { active = false; clearTimeout(timer); };
+  }, [displayedText, isDeleting, textIndex]);
+
+  return (
+    <span className="min-h-[40px] inline-block text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-[#cc6431] to-[#e43a15]">
+      {displayedText}
+      <span className="animate-pulse border-r-4 border-[#cc6431] ml-1 text-[#cc6431]">|</span>
+    </span>
+  );
+}
+
 export default function PublicOrderPage() {
   const router = useRouter();
   const [started, setStarted] = useState(false);
@@ -57,13 +100,17 @@ export default function PublicOrderPage() {
   }
 
   return (
-    <div className="order-page-container min-h-screen flex justify-center pt-20 pb-28 px-4 relative overflow-hidden bg-[#fffaf7]">
-      {/* BACKGROUND FLOATING EMOJIS */}
+    <div className="order-page-container min-h-screen flex justify-center pt-20 pb-28 px-4 relative overflow-hidden bg-gradient-to-br from-[#fff1eb] via-[#fffaf7] to-[#ffece6]">
+      {/* GLOWING MESH BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <motion.div animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="absolute top-[20%] left-[10%] text-6xl opacity-[0.03]">🍔</motion.div>
-        <motion.div animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }} className="absolute top-[60%] left-[15%] text-5xl opacity-[0.03]">🥤</motion.div>
-        <motion.div animate={{ y: [0, -25, 0], rotate: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} className="absolute top-[30%] right-[10%] text-6xl opacity-[0.03]">🛍️</motion.div>
-        <motion.div animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.5 }} className="absolute top-[70%] right-[15%] text-5xl opacity-[0.03]">🎁</motion.div>
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#ffb347] opacity-[0.08] blur-[100px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#f35b4b] opacity-[0.06] blur-[120px]"></div>
+        
+        {/* BACKGROUND FLOATING EMOJIS */}
+        <motion.div animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="absolute top-[20%] left-[10%] text-6xl opacity-[0.04]">🍔</motion.div>
+        <motion.div animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }} className="absolute top-[60%] left-[15%] text-5xl opacity-[0.04]">🥤</motion.div>
+        <motion.div animate={{ y: [0, -25, 0], rotate: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} className="absolute top-[30%] right-[10%] text-6xl opacity-[0.04]">🛍️</motion.div>
+        <motion.div animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.5 }} className="absolute top-[70%] right-[15%] text-5xl opacity-[0.04]">🎁</motion.div>
       </div>
 
       {/* RUNNING BANNER (MARQUEE) */}
@@ -96,25 +143,31 @@ export default function PublicOrderPage() {
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="flex flex-col justify-center items-center text-center w-full max-w-md my-auto"
           >
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1, y: [0, -12, 0] }}
-              transition={{ 
-                scale: { type: "spring", stiffness: 200, delay: 0.2 },
-                opacity: { delay: 0.2 },
-                y: { repeat: Infinity, duration: 3, ease: "easeInOut", delay: 0.5 } 
-              }}
-              className="w-40 h-40 rounded-full shadow-lg shadow-orange-100 mb-6 overflow-hidden bg-white flex items-center justify-center"
-            >
-              <img src="/logo.png" alt="Jstipku Logo" className="w-full h-full object-cover" />
-            </motion.div>
+            <div className="relative mb-8">
+              {/* GLOWING AURA */}
+              <motion.div 
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                className="absolute inset-0 bg-[#ffb347] rounded-full blur-[30px] z-0"
+              ></motion.div>
+              
+              <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1, y: [0, -12, 0] }}
+                transition={{ 
+                  scale: { type: "spring", stiffness: 200, delay: 0.2 },
+                  opacity: { delay: 0.2 },
+                  y: { repeat: Infinity, duration: 3, ease: "easeInOut", delay: 0.5 } 
+                }}
+                className="w-40 h-40 rounded-full shadow-[0_0_40px_rgba(204,100,49,0.3)] overflow-hidden bg-white flex items-center justify-center relative z-10 mx-auto"
+              >
+                <img src="/logo.png" alt="Jstipku Logo" className="w-full h-full object-cover" />
+              </motion.div>
+            </div>
             
-            <motion.h1 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-              className="text-3xl font-extrabold text-[#2c1c14] mb-4"
-            >
-              Lagi Mager Keluar?
-            </motion.h1>
+            <div className="mb-4 h-20 flex items-center justify-center">
+              <TypewriterEffect />
+            </div>
             
             <motion.p 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
@@ -141,11 +194,11 @@ export default function PublicOrderPage() {
 
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-              className="mt-8 flex justify-center gap-5 text-sm text-[#8a6a56] font-medium"
+              className="mt-8 flex flex-wrap justify-center gap-3 text-sm font-semibold"
             >
-              <div className="flex items-center gap-1">⚡ Cepat</div>
-              <div className="flex items-center gap-1">💸 Murah</div>
-              <div className="flex items-center gap-1">✨ Aman</div>
+              <div className="flex items-center gap-1.5 px-4 py-2 bg-white/60 backdrop-blur-md border border-[#ffb347]/30 rounded-full text-[#cc6431] shadow-sm">⚡ Cepat</div>
+              <div className="flex items-center gap-1.5 px-4 py-2 bg-white/60 backdrop-blur-md border border-[#ffb347]/30 rounded-full text-[#cc6431] shadow-sm">💸 Murah</div>
+              <div className="flex items-center gap-1.5 px-4 py-2 bg-white/60 backdrop-blur-md border border-[#ffb347]/30 rounded-full text-[#cc6431] shadow-sm">✨ Aman</div>
             </motion.div>
 
             {reviews.length > 0 && (
