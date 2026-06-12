@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
+import type { OrderRequest } from "@/lib/types";
 
 export default function PublicOrderPage() {
   const router = useRouter();
@@ -18,6 +19,21 @@ export default function PublicOrderPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const [reviews, setReviews] = useState<OrderRequest[]>([]);
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+
+  useEffect(() => {
+    api.getPublicReviews().then(setReviews).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (reviews.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [reviews.length]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -41,7 +57,7 @@ export default function PublicOrderPage() {
   }
 
   return (
-    <div className="order-page-container min-h-screen flex justify-center py-12 px-4 relative overflow-hidden bg-[#fffaf7]">
+    <div className="order-page-container min-h-screen flex justify-center py-12 px-4 relative overflow-hidden bg-[#fffaf7] pb-20">
       {/* RUNNING BANNER (MARQUEE) */}
       <div className="absolute top-0 left-0 w-full bg-[#cc6431] text-white py-2 z-50 overflow-hidden flex whitespace-nowrap shadow-md">
         <motion.div
@@ -117,6 +133,32 @@ export default function PublicOrderPage() {
               <div className="flex items-center gap-1">💸 Murah</div>
               <div className="flex items-center gap-1">✨ Aman</div>
             </motion.div>
+
+            {reviews.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+                className="mt-8 w-full max-w-[300px]"
+              >
+                <div className="bg-white/80 rounded-2xl p-4 shadow-sm border border-[#f2dfcf]/50 relative overflow-hidden min-h-[100px] flex flex-col justify-center">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentReviewIndex}
+                      initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-center"
+                    >
+                      <div className="flex justify-center gap-1 mb-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star} className="text-sm" style={{ color: star <= (reviews[currentReviewIndex].review_rating || 5) ? "#ffb347" : "#e6d8cf" }}>★</span>
+                        ))}
+                      </div>
+                      <p className="text-sm text-[#6d5549] italic mb-2 line-clamp-3 leading-relaxed">"{reviews[currentReviewIndex].review_text}"</p>
+                      <p className="text-xs font-bold text-[#cc6431] uppercase tracking-wider">— {reviews[currentReviewIndex].customer_name}</p>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         ) : (
           <motion.div 
@@ -240,6 +282,25 @@ export default function PublicOrderPage() {
         </motion.div>
         )}
       </AnimatePresence>
+
+      {/* MOTORCYCLE ASPHALT ANIMATION */}
+      <div className="absolute bottom-0 left-0 w-full h-12 bg-[#333] z-40 flex items-center overflow-hidden">
+        {/* Road dashes */}
+        <div className="absolute top-1/2 w-full flex justify-between px-2 opacity-60">
+          {[...Array(20)].map((_, i) => (
+            <div key={i} className="w-8 h-1 bg-white rounded-full"></div>
+          ))}
+        </div>
+        {/* Moving Motorcycle */}
+        <motion.div
+          animate={{ x: ["-10vw", "110vw"] }}
+          transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+          className="relative text-3xl z-10 flex items-center"
+        >
+          <span className="transform -scale-x-100">🛵</span>
+          <span className="absolute -left-3 top-2 text-sm opacity-50">💨</span>
+        </motion.div>
+      </div>
     </div>
   );
 }

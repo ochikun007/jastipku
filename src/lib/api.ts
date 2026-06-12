@@ -584,4 +584,17 @@ export const api = {
     if (error) throw error;
     return data as OrderRequest;
   },
+
+  getPublicReviews: async (): Promise<OrderRequest[]> => {
+    const { data, error } = await supabase
+      .from("order_requests")
+      .select("customer_name, review_rating, review_text, created_at")
+      .gte("review_rating", 4)
+      .not("review_text", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    if (error) throw error;
+    // @ts-ignore
+    return data as OrderRequest[];
+  },
 };
