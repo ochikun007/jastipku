@@ -236,279 +236,231 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
   }
 
   return (
-    <div className="order-page-container relative overflow-hidden min-h-screen bg-gradient-to-br from-[#fff1eb] via-[#fffaf7] to-[#ffece6] pb-24">
-      {/* BACKGROUND FLOATING EMOJIS */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="absolute top-[20%] left-[10%] text-6xl opacity-[0.04]">📦</motion.div>
-        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }} className="absolute top-[60%] left-[15%] text-5xl opacity-[0.04]">🛵</motion.div>
-        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, -25, 0], rotate: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} className="absolute top-[30%] right-[10%] text-6xl opacity-[0.04]">🛍️</motion.div>
-        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.5 }} className="absolute top-[70%] right-[15%] text-5xl opacity-[0.04]">🍔</motion.div>
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="order-page-card relative z-10"
-      >
-        <div className="order-page-header">
-          <img src="/logo.png" alt="Jstipku Logo" className="w-full h-auto object-cover" />
-          <p className="order-page-subtitle mt-2 font-semibold text-[#6d5549]">{isCompleted ? "🎉 Pesanan Selesai 🎉" : "Pelacakan Pesanan"}</p>
-          {request.order_number && (
-            <p style={{ marginTop: "0.25rem", marginBottom: "1rem", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "0.05em", color: "#2c1c14" }}>Order #{request.order_number}</p>
-          )}
+    <div className="min-h-screen bg-[#F2F2F7] pb-24 font-sans text-[#1C1C1E] selection:bg-blue-200">
+      <div className="max-w-md mx-auto pt-8 px-4">
+        
+        {/* Title */}
+        <div className="mb-6 px-2">
+          <h1 className="text-3xl font-bold tracking-tight">Pelacakan</h1>
+          <p className="text-[15px] text-[#8E8E93] mt-1">
+            {isCompleted ? "Pesanan Selesai" : "Status Pesanan Anda"}
+          </p>
         </div>
 
-        <div className="order-page-body">
-          {/* Customer info card */}
-          <div className="tracking-info-card">
+        {/* Customer Info Card - iOS List Group */}
+        <div className="bg-white rounded-[14px] overflow-hidden mb-6">
+          <div className="divide-y divide-[#E5E5EA]">
             {request.order_number && (
-              <div className="tracking-info-row">
-                <span className="tracking-info-label">No. Order</span>
-                <span className="tracking-info-value" style={{ color: "#cc6431" }}>#{request.order_number}</span>
+              <div className="px-4 py-3 flex justify-between items-center bg-white text-[15px]">
+                <span className="text-[#8E8E93]">No. Order</span>
+                <span className="font-semibold text-[#007AFF]">#{request.order_number}</span>
               </div>
             )}
-            <div className="tracking-info-row">
-              <span className="tracking-info-label">Pelanggan</span>
-              <span className="tracking-info-value">{request.customer_name}</span>
+            <div className="px-4 py-3 flex justify-between items-center bg-white text-[15px]">
+              <span className="text-[#8E8E93]">Pelanggan</span>
+              <span className="font-medium">{request.customer_name}</span>
             </div>
-            <div className="tracking-info-row">
-              <span className="tracking-info-label">Telepon</span>
-              <span className="tracking-info-value">{request.customer_phone}</span>
+            <div className="px-4 py-3 flex justify-between items-center bg-white text-[15px]">
+              <span className="text-[#8E8E93]">Telepon</span>
+              <span className="font-medium">{request.customer_phone}</span>
             </div>
             {request.request_items && (
-              <div className="tracking-info-row tracking-info-row-col">
-                <span className="tracking-info-label">Pesanan</span>
-                <span className="tracking-info-value tracking-info-items">{request.request_items}</span>
+              <div className="px-4 py-3 bg-white text-[15px]">
+                <div className="text-[#8E8E93] mb-1">Pesanan</div>
+                <div className="font-medium whitespace-pre-line leading-relaxed">{request.request_items}</div>
               </div>
             )}
             {request.store_preferences && (
-              <div className="tracking-info-row">
-                <span className="tracking-info-label">Toko</span>
-                <span className="tracking-info-value">{request.store_preferences}</span>
+              <div className="px-4 py-3 flex justify-between items-center bg-white text-[15px]">
+                <span className="text-[#8E8E93]">Toko</span>
+                <span className="font-medium">{request.store_preferences}</span>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Tracking Stepper */}
-          <motion.div 
-            className="tracking-stepper"
-            initial="hidden"
-            animate="visible"
-            variants={{ visible: { transition: { staggerChildren: 0.15 } } }}
-          >
+        {/* Tracking Stepper */}
+        <div className="bg-white rounded-[14px] p-5 mb-6">
+          <h2 className="text-[13px] font-semibold text-[#8E8E93] uppercase tracking-wider mb-4">Progres</h2>
+          <div className="flex flex-col">
             {TRACKING_STEPS.map((step, index) => {
               const isDone = index <= currentIndex;
               const isActive = index === currentIndex;
               const stepTime = timestamps[step.key];
 
               return (
-                <motion.div 
-                  key={step.key} 
-                  className="tracking-step"
-                  variants={{ hidden: { opacity: 0, x: -10 }, visible: { opacity: 1, x: 0 } }}
-                >
-                  <div className="tracking-step-line-area">
-                    <motion.div 
-                      className={`tracking-step-dot ${isDone ? "tracking-step-dot-done" : ""} ${isActive ? "tracking-step-dot-active shadow-[0_0_15px_rgba(204,100,49,0.5)]" : ""}`}
-                      initial={isDone || isActive ? { scale: 0 } : false}
-                      animate={isActive ? { scale: [1, 1.15, 1] } : (isDone ? { scale: 1 } : false)}
-                      transition={isActive ? { repeat: Infinity, duration: 2, ease: "easeInOut" } : { type: "spring", stiffness: 300, damping: 20 }}
-                    >
-                      {isDone ? "✓" : step.icon}
-                    </motion.div>
+                <div key={step.key} className="flex gap-4 relative">
+                  <div className="flex flex-col items-center w-6 shrink-0">
+                    <div 
+                      className={`w-4 h-4 rounded-full border-2 border-white shadow-sm z-10 ${
+                        isActive ? "bg-[#007AFF] ring-4 ring-blue-100" : isDone ? "bg-[#34C759]" : "bg-[#E5E5EA]"
+                      }`}
+                    />
                     {index < TRACKING_STEPS.length - 1 && (
-                      <div className={`tracking-step-line ${isDone ? "tracking-step-line-done" : ""}`} />
+                      <div className={`w-0.5 h-full min-h-[32px] -mt-1 -mb-1 ${isDone ? "bg-[#34C759]" : "bg-[#E5E5EA]"}`} />
                     )}
                   </div>
-                  <div className={`tracking-step-content ${isDone ? "tracking-step-content-done" : ""} ${isActive ? "tracking-step-content-active" : ""}`}>
-                    <span className="tracking-step-label">{step.label}</span>
+                  <div className={`pb-6 ${isActive ? "opacity-100" : isDone ? "opacity-75" : "opacity-40"}`}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[15px] font-medium">{step.label}</span>
+                    </div>
                     {isDone && stepTime && (
-                      <span className="tracking-step-time">{formatTrackingTime(stepTime)}</span>
+                      <span className="text-[13px] text-[#8E8E93] mt-0.5 block">{formatTrackingTime(stepTime)}</span>
                     )}
                   </div>
-                </motion.div>
+                </div>
               );
             })}
-          </motion.div>
-
-          {/* Live GPS Map */}
-          {request.courier_lat && request.courier_lng && !isCompleted && (
-            <motion.div 
-              className="mt-6 border-2 border-[#cc6431] rounded-[24px] overflow-hidden shadow-[0_0_25px_rgba(204,100,49,0.2)]"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="bg-[#cc6431] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                  </span>
-                  Lacak Kurir Secara Langsung
-                </div>
-                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">LIVE</span>
-              </div>
-              <div className="w-full h-[250px] bg-[#fffaf6] relative pointer-events-none">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  scrolling="no"
-                  marginHeight={0}
-                  marginWidth={0}
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${request.courier_lng - 0.005},${request.courier_lat - 0.005},${request.courier_lng + 0.005},${request.courier_lat + 0.005}&layer=mapnik&marker=${request.courier_lat},${request.courier_lng}`}
-                  style={{ border: "none" }}
-                ></iframe>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Receipt UI */}
-          {orderDetail && (
-            <motion.div 
-              className="mt-6 border border-[#f2dfcf] bg-white/80 rounded-[28px] p-5 shadow-sm"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex items-center gap-2 mb-4 border-b border-[#f2dfcf]/50 pb-3">
-                <span className="text-xl">🧾</span>
-                <h3 className="font-bold text-[#4a3525] uppercase tracking-wider text-xs">Rincian Tagihan</h3>
-              </div>
-              
-              <div className="space-y-3 mb-4">
-                {orderDetail.items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-start text-sm">
-                    <div className="flex-1 pr-4">
-                      <p className="font-semibold text-[#2c1c14]">{item.product_name}</p>
-                      <p className="text-xs text-[#8a6a56]">{item.quantity}x @ {formatCurrency(item.unit_price)}</p>
-                    </div>
-                    <p className="font-semibold text-[#4a3525]">{formatCurrency(item.line_total)}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border-t border-dashed border-[#f2dfcf] pt-3 space-y-2 text-sm">
-                <div className="flex justify-between text-[#6d5549]">
-                  <span>Subtotal Barang</span>
-                  <span className="font-medium">{formatCurrency(orderDetail.order.subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-[#6d5549]">
-                  <span>Ongkos Kirim (Jastip)</span>
-                  <span className="font-medium">{formatCurrency(orderDetail.order.shipping_cost)}</span>
-                </div>
-                <div className="flex justify-between text-base font-bold text-[#cc6431] pt-3 mt-1 border-t border-[#f2dfcf]/50">
-                  <span>Total Harus Dibayar</span>
-                  <span>{formatCurrency(orderDetail.order.total_amount)}</span>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Completion message & Review Section */}
-          {isCompleted && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, type: "spring" }}
-              className="mt-6 border border-[#f2dfcf] bg-white/80 rounded-[28px] p-6 shadow-sm text-center"
-            >
-              <motion.div 
-                className="text-6xl mb-4"
-                animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-              >
-                🎉
-              </motion.div>
-              <p className="text-xl font-bold text-[#2c1c14] mb-2 font-[family:var(--font-display)]">Pesanan Selesai!</p>
-              <p className="text-[#8a6a56] text-sm mb-6">Terima kasih sudah menggunakan jasa <strong>Jstipku</strong>. Jangan lupa order lagi ya! 🧡</p>
-              
-              <div className="border-t border-[#f2dfcf]/50 pt-5 mt-2">
-                <p className="font-semibold text-[#4a3525] mb-3">Bagaimana pelayanan kami?</p>
-                
-                {reviewSubmitted ? (
-                  <div className="bg-[#fffaf6] rounded-xl p-4 border border-[#f2dfcf]">
-                    <div className="flex justify-center gap-1 mb-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span key={star} className="text-2xl" style={{ color: star <= (request.review_rating || rating) ? "#ffb347" : "#e6d8cf" }}>
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                    {(request.review_text || reviewText) && (
-                      <p className="text-sm text-[#6d5549] italic mt-2">"{request.review_text || reviewText}"</p>
-                    )}
-                    <p className="text-xs text-emerald-600 font-semibold mt-3">✓ Ulasan telah dikirim. Terima kasih!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex justify-center gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => setRating(star)}
-                          className="text-3xl transition-transform hover:scale-110 active:scale-95"
-                          style={{ color: star <= rating ? "#ffb347" : "#e6d8cf" }}
-                        >
-                          ★
-                        </button>
-                      ))}
-                    </div>
-                    {rating > 0 && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-3">
-                        <textarea
-                          value={reviewText}
-                          onChange={(e) => setReviewText(e.target.value)}
-                          placeholder="Tulis ulasan Anda (opsional)..."
-                          className="w-full text-sm px-4 py-3 bg-[#fffaf6] border border-[#f2dfcf] rounded-xl focus:border-[#cc6431] outline-none transition resize-none"
-                          rows={3}
-                        />
-                        <button
-                          onClick={() => void handleSubmitReview()}
-                          disabled={submittingReview}
-                          className="w-full bg-[#cc6431] text-white font-bold py-3 rounded-xl disabled:opacity-50"
-                        >
-                          {submittingReview ? "Mengirim..." : "Kirim Ulasan"}
-                        </button>
-                      </motion.div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Google Maps link */}
-          {request.google_maps_link && (
-            <motion.a
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              href={request.google_maps_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tracking-maps-btn"
-            >
-              📍 Buka di Google Maps
-            </motion.a>
-          )}
-
-          {/* Refresh button */}
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="button" 
-            onClick={() => void handleManualRefresh()} 
-            disabled={refreshing}
-            className="mt-2 rounded-xl bg-[#cc6431] px-4 py-2 text-white font-semibold flex items-center justify-center gap-2 mx-auto disabled:opacity-50"
-          >
-            {refreshing ? "🔄 Memperbarui..." : "🔄 Refresh Status"}
-          </motion.button>
-
-          <p className="tracking-refresh-note">Halaman ini otomatis memperbarui status setiap 5 detik.</p>
+          </div>
         </div>
-      </motion.div>
+
+        {/* Live GPS Map */}
+        {request.courier_lat && request.courier_lng && !isCompleted && (
+          <div className="bg-white rounded-[14px] overflow-hidden mb-6 relative">
+            <div className="absolute top-3 left-3 right-3 z-10 flex justify-between items-center">
+              <div className="bg-white/80 backdrop-blur-md text-[#1C1C1E] px-3 py-1.5 rounded-full text-[13px] font-semibold flex items-center gap-2 shadow-sm border border-black/5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#34C759] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#34C759]"></span>
+                </span>
+                Lokasi Langsung
+              </div>
+            </div>
+            <div className="w-full h-[250px] bg-[#E5E5EA] relative pointer-events-none">
+              <iframe
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                scrolling="no"
+                marginHeight={0}
+                marginWidth={0}
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${request.courier_lng - 0.005},${request.courier_lat - 0.005},${request.courier_lng + 0.005},${request.courier_lat + 0.005}&layer=mapnik&marker=${request.courier_lat},${request.courier_lng}`}
+                style={{ border: "none" }}
+              ></iframe>
+            </div>
+          </div>
+        )}
+
+        {/* Receipt UI */}
+        {orderDetail && (
+          <div className="bg-white rounded-[14px] p-5 mb-6">
+            <h2 className="text-[13px] font-semibold text-[#8E8E93] uppercase tracking-wider mb-3">Tagihan</h2>
+            <div className="space-y-3 mb-4">
+              {orderDetail.items.map((item) => (
+                <div key={item.id} className="flex justify-between items-start text-[15px]">
+                  <div className="flex-1 pr-4">
+                    <p className="font-medium text-[#1C1C1E]">{item.product_name}</p>
+                    <p className="text-[13px] text-[#8E8E93]">{item.quantity}x @ {formatCurrency(item.unit_price)}</p>
+                  </div>
+                  <p className="font-medium text-[#1C1C1E]">{formatCurrency(item.line_total)}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-[#E5E5EA] pt-3 space-y-2 text-[15px]">
+              <div className="flex justify-between text-[#8E8E93]">
+                <span>Subtotal Barang</span>
+                <span className="font-medium text-[#1C1C1E]">{formatCurrency(orderDetail.order.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-[#8E8E93]">
+                <span>Ongkos Kirim</span>
+                <span className="font-medium text-[#1C1C1E]">{formatCurrency(orderDetail.order.shipping_cost)}</span>
+              </div>
+              <div className="flex justify-between text-[17px] font-semibold text-[#1C1C1E] pt-3 mt-1 border-t border-[#E5E5EA]">
+                <span>Total</span>
+                <span>{formatCurrency(orderDetail.order.total_amount)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Completion message & Review Section */}
+        {isCompleted && (
+          <div className="bg-white rounded-[14px] p-6 text-center mb-6 border border-[#E5E5EA]">
+            <div className="w-16 h-16 bg-[#34C759]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">✓</span>
+            </div>
+            <p className="text-[20px] font-bold text-[#1C1C1E] mb-1">Pesanan Selesai</p>
+            <p className="text-[15px] text-[#8E8E93] mb-6">Terima kasih telah menggunakan layanan kami.</p>
+            
+            <div className="border-t border-[#E5E5EA] pt-5 mt-2">
+              <p className="text-[15px] font-semibold text-[#1C1C1E] mb-4">Nilai Pelayanan Kami</p>
+              
+              {reviewSubmitted ? (
+                <div className="bg-[#F2F2F7] rounded-[12px] p-4">
+                  <div className="flex justify-center gap-1 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star} className="text-xl" style={{ color: star <= (request.review_rating || rating) ? "#FF9500" : "#D1D1D6" }}>
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  {(request.review_text || reviewText) && (
+                    <p className="text-[14px] text-[#8E8E93] italic mt-2">"{request.review_text || reviewText}"</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        className="text-3xl transition-transform active:scale-95"
+                        style={{ color: star <= rating ? "#FF9500" : "#E5E5EA" }}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                  {rating > 0 && (
+                    <div className="space-y-3">
+                      <textarea
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        placeholder="Ulasan (opsional)"
+                        className="w-full text-[15px] px-4 py-3 bg-[#F2F2F7] rounded-[12px] focus:ring-2 focus:ring-[#007AFF] focus:bg-white outline-none transition resize-none border border-transparent focus:border-[#007AFF]"
+                        rows={3}
+                      />
+                      <button
+                        onClick={() => void handleSubmitReview()}
+                        disabled={submittingReview}
+                        className="w-full bg-[#007AFF] text-white font-semibold py-3.5 rounded-[12px] disabled:opacity-50 active:scale-[0.98] transition-transform"
+                      >
+                        {submittingReview ? "Mengirim..." : "Kirim Ulasan"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Google Maps link */}
+        {request.google_maps_link && (
+          <a
+            href={request.google_maps_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-[#E5F1FF] px-4 py-3.5 text-[15px] font-semibold text-[#007AFF] active:bg-[#D1E5FF] transition mb-3"
+          >
+            📍 Buka di Maps
+          </a>
+        )}
+
+        {/* Refresh button */}
+        <button 
+          type="button" 
+          onClick={() => void handleManualRefresh()} 
+          disabled={refreshing}
+          className="w-full rounded-[14px] bg-white px-4 py-3.5 text-[15px] font-semibold text-[#1C1C1E] border border-[#E5E5EA] active:bg-[#F2F2F7] transition disabled:opacity-50"
+        >
+          {refreshing ? "Memperbarui..." : "Refresh Status"}
+        </button>
+
+        <p className="text-center text-[12px] text-[#8E8E93] mt-4 uppercase tracking-wide font-medium">Otomatis refresh per 5 detik</p>
+      </div>
     </div>
   );
 }
