@@ -986,6 +986,16 @@ export function MobileDashboard() {
                         </button>
                       ))}
                     </div>
+                    
+                    <a
+                      href={`/order/${req.request_code}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold bg-[#fff0e6] text-[#cc6431] hover:bg-[#ffe5d4] transition-all border border-[#ffe5d4]"
+                    >
+                      🔗 Buka Link Pelanggan
+                    </a>
+
                     <button
                       onClick={() => toggleLocationSharing(req.id)}
                       className={`mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all ${
@@ -1083,6 +1093,20 @@ export function MobileDashboard() {
                             </a>
                           </div>
                         )}
+
+                        {order.order_requests && order.order_requests.length > 0 && (
+                          <div className="mt-2">
+                            <a 
+                              href={`/order/${order.order_requests[0].request_code}`} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-100 px-4 py-3 text-sm font-semibold text-orange-700 transition hover:bg-orange-200 border border-orange-200"
+                            >
+                              🔗 Buka Link Tracking Pelanggan
+                            </a>
+                          </div>
+                        )}
+
                       </div>
                       <div className="flex flex-col gap-2">
                         {order.status !== 'completed' && (
