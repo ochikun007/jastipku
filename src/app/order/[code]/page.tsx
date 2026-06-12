@@ -326,6 +326,32 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
             })}
           </motion.div>
 
+          {/* Live GPS Map */}
+          {request.courier_lat && request.courier_lng && !isCompleted && (
+            <motion.div 
+              className="mt-6 border border-[#f2dfcf] rounded-[24px] overflow-hidden shadow-sm"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="bg-[#cc6431] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                <span className="animate-pulse">📍</span> Live Kurir Location
+              </div>
+              <div className="w-full h-[250px] bg-[#fffaf6] relative pointer-events-none">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  scrolling="no"
+                  marginHeight={0}
+                  marginWidth={0}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${request.courier_lng - 0.005},${request.courier_lat - 0.005},${request.courier_lng + 0.005},${request.courier_lat + 0.005}&layer=mapnik&marker=${request.courier_lat},${request.courier_lng}`}
+                  style={{ border: "none" }}
+                ></iframe>
+              </div>
+            </motion.div>
+          )}
+
           {/* Receipt UI */}
           {orderDetail && (
             <motion.div 

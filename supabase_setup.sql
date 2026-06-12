@@ -82,6 +82,10 @@ CREATE TABLE order_requests (
     tracking_status TEXT NOT NULL DEFAULT 'waiting',
     tracking_timestamps JSONB NOT NULL DEFAULT '{}',
     linked_order_id BIGINT REFERENCES orders(id) ON DELETE SET NULL,
+    review_rating INTEGER CHECK (review_rating >= 1 AND review_rating <= 5),
+    review_text TEXT,
+    courier_lat FLOAT,
+    courier_lng FLOAT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

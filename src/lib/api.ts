@@ -597,4 +597,12 @@ export const api = {
     // @ts-ignore
     return data as OrderRequest[];
   },
+
+  updateCourierLocation: async (id: number, lat: number | null, lng: number | null): Promise<void> => {
+    const { error } = await supabase
+      .from("order_requests")
+      .update({ courier_lat: lat, courier_lng: lng })
+      .eq("id", id);
+    if (error) throw error;
+  },
 };

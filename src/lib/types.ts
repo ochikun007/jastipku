@@ -129,6 +129,8 @@ export type OrderRequest = {
   linked_order_id: number | null;
   review_rating?: number | null;
   review_text?: string | null;
+  courier_lat?: number | null;
+  courier_lng?: number | null;
   created_at: string;
 };
 

@@ -21,6 +21,8 @@ import {
   Store as StoreIcon,
   Trash2,
   WalletCards,
+  MapPin,
+  MapPinOff,
 } from "lucide-react";
 
 type TabId = "home" | "toko" | "produk" | "order" | "kas";
@@ -168,6 +170,13 @@ export function MobileDashboard() {
   const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "yesterday" | "week" | "month">("all");
+
+  const [sharingLocationId, setSharingLocationId] = useState<number | null>(null);
+  const watchIdRef = useRef<number | null>(null);
+
+  const showNotice = (tone: "success" | "error", message: string) => {
+    setNotice({ tone, message });
+  };
 
   const filterDate = (dateString: string) => {
     if (dateFilter === "all") return true;
@@ -635,6 +644,39 @@ export function MobileDashboard() {
   const pendingRequests = orderRequests.filter((r) => r.status === "pending");
   const processingRequests = orderRequests.filter((r) => r.status === "processing");
 
+  const toggleLocationSharing = (reqId: number) => {
+    if (sharingLocationId === reqId) {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+      setSharingLocationId(null);
+      api.updateCourierLocation(reqId, null, null).catch(console.error);
+      showNotice("success", "Berbagi lokasi dihentikan.");
+    } else {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      if ("geolocation" in navigator) {
+        setSharingLocationId(reqId);
+        showNotice("success", "Mulai membagikan lokasi GPS...");
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          (pos) => {
+            api.updateCourierLocation(reqId, pos.coords.latitude, pos.coords.longitude).catch(console.error);
+          },
+          (err) => {
+            console.error("Geolocation error:", err);
+            showNotice("error", "Gagal mengakses GPS. Periksa izin lokasi HP Anda.");
+            setSharingLocationId(null);
+          },
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        );
+      } else {
+        showNotice("error", "Browser Anda tidak mendukung GPS.");
+      }
+    }
+  };
+
   function handleCreateLedgerEntry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -944,6 +986,20 @@ export function MobileDashboard() {
                         </button>
                       ))}
                     </div>
+                    <button
+                      onClick={() => toggleLocationSharing(req.id)}
+                      className={`mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-all ${
+                        sharingLocationId === req.id 
+                          ? "bg-red-100 text-red-600 border border-red-200" 
+                          : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                      }`}
+                    >
+                      {sharingLocationId === req.id ? (
+                        <><MapPinOff className="w-4 h-4" /> Stop Bagikan Lokasi</>
+                      ) : (
+                        <><MapPin className="w-4 h-4" /> Bagikan Lokasi Live GPS</>
+                      )}
+                    </button>
                   </div>
                 ))}
               </div>
