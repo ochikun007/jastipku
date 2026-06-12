@@ -131,6 +131,7 @@ export type OrderRequest = {
   review_text?: string | null;
   courier_lat?: number | null;
   courier_lng?: number | null;
+  proof_image_url?: string | null;
   created_at: string;
 };
 

@@ -86,6 +86,7 @@ CREATE TABLE order_requests (
     review_text TEXT,
     courier_lat FLOAT,
     courier_lng FLOAT,
+    proof_image_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

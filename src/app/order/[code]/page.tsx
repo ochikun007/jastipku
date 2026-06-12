@@ -206,6 +206,9 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(!!request.review_rating);
 
+  // Elapsed Time hook
+  const [elapsedTime, setElapsedTime] = useState("");
+
   useEffect(() => {
     // 4 is the index for "ready_to_deliver" (Pesanan Siap Antar)
     if (currentIndex >= 4 && request.linked_order_id) {
@@ -214,6 +217,42 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
         .catch(console.error);
     }
   }, [currentIndex, request.linked_order_id]);
+
+  useEffect(() => {
+    if (!timestamps["pending"]) return;
+    
+    // If completed, just show final duration and stop interval
+    const startTime = new Date(timestamps["pending"]).getTime();
+    const endTime = isCompleted && timestamps["completed"] 
+      ? new Date(timestamps["completed"]).getTime() 
+      : null;
+
+    const updateTimer = () => {
+      const now = endTime || Date.now();
+      const diff = now - startTime;
+      if (diff < 0) return setElapsedTime("0m 0s");
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      if (hours > 0) {
+        setElapsedTime(`${hours}j ${minutes}m ${seconds}d`);
+      } else {
+        setElapsedTime(`${minutes}m ${seconds}d`);
+      }
+    };
+
+    updateTimer();
+    let interval: NodeJS.Timeout | null = null;
+    if (!isCompleted) {
+      interval = setInterval(updateTimer, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [timestamps, isCompleted]);
 
   async function handleManualRefresh() {
     setRefreshing(true);
@@ -300,8 +339,17 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
         </motion.div>
 
         {/* Tracking Stepper */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[24px] p-6 mb-6">
-          <h2 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-5">Progres Pengiriman</h2>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[24px] p-6 mb-6 relative">
+          
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">Progres Pengiriman</h2>
+            {elapsedTime && (
+              <div className="bg-white/60 px-3 py-1 rounded-full text-[12px] font-bold text-blue-600 flex items-center gap-1.5 shadow-sm border border-white">
+                <span className="text-sm">⏱️</span> {elapsedTime}
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-col">
             {TRACKING_STEPS.map((step, index) => {
               const isDone = index <= currentIndex;
@@ -401,8 +449,19 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
               <span className="text-4xl text-white">✓</span>
             </div>
             <p className="text-[22px] font-black text-slate-800 mb-1">Pesanan Selesai!</p>
-            <p className="text-[15px] text-slate-500 font-medium mb-8">Terima kasih telah mempercayakan belanjaan Anda kepada kami. ✨</p>
+            <p className="text-[15px] text-slate-500 font-medium mb-6">Terima kasih telah mempercayakan belanjaan Anda kepada kami. ✨</p>
             
+            {request.proof_image_url && (
+              <div className="mb-8 border border-white/60 p-2 bg-white/30 rounded-[20px] shadow-sm">
+                <p className="text-[13px] font-bold text-slate-500 uppercase tracking-widest mb-3 text-left pl-2">📸 Bukti Pengiriman</p>
+                <img 
+                  src={request.proof_image_url} 
+                  alt="Bukti Pengiriman" 
+                  className="w-full h-auto rounded-[14px] object-cover" 
+                />
+              </div>
+            )}
+
             <div className="border-t border-white/40 pt-6">
               <p className="text-[16px] font-bold text-slate-800 mb-5">Seberapa puas Anda?</p>
               
@@ -457,17 +516,28 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
           </motion.div>
         )}
 
-        {/* Google Maps link */}
-        {request.google_maps_link && (
+        {/* Google Maps & WhatsApp link */}
+        <div className="flex gap-3 mb-4">
           <a
-            href={request.google_maps_link}
+            href={`https://wa.me/628123456789?text=Halo%20Admin%20Jstipku,%20saya%20pelanggan%20dengan%20nomor%20pesanan%20${request.order_number || request.request_code}.`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 rounded-[20px] bg-white/40 backdrop-blur-xl border border-white/60 shadow-sm px-4 py-4 text-[16px] font-bold text-blue-600 active:scale-[0.98] transition-transform mb-4"
+            className="flex flex-1 items-center justify-center gap-2 rounded-[20px] bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-lg shadow-emerald-500/25 px-4 py-4 text-[15px] font-bold text-white active:scale-[0.98] transition-transform"
           >
-            📍 Buka Navigasi di Maps
+            💬 Chat Admin
           </a>
-        )}
+
+          {request.google_maps_link && (
+            <a
+              href={request.google_maps_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-1 items-center justify-center gap-2 rounded-[20px] bg-white/40 backdrop-blur-xl border border-white/60 shadow-sm px-4 py-4 text-[15px] font-bold text-blue-600 active:scale-[0.98] transition-transform"
+            >
+              📍 Maps
+            </a>
+          )}
+        </div>
 
         {/* Refresh button */}
         <button 

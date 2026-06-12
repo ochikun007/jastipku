@@ -513,7 +513,7 @@ export const api = {
     return data as OrderRequest;
   },
 
-  updateTrackingStatus: async (id: number, tracking_status: TrackingStatus): Promise<OrderRequest> => {
+  updateTrackingStatus: async (id: number, tracking_status: TrackingStatus, proof_image_url?: string): Promise<OrderRequest> => {
     // First read current timestamps
     const { data: current } = await supabase
       .from("order_requests")
@@ -529,6 +529,9 @@ export const api = {
       tracking_status,
       tracking_timestamps: mergedTimestamps,
     };
+    if (proof_image_url) {
+      updates.proof_image_url = proof_image_url;
+    }
     if (tracking_status === "completed") {
       updates.status = "completed";
     } else if (tracking_status !== "waiting" && tracking_status !== "pending") {
@@ -602,6 +605,35 @@ export const api = {
     const { error } = await supabase
       .from("order_requests")
       .update({ courier_lat: lat, courier_lng: lng })
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  // ─── FILE UPLOAD ───
+  uploadProofImage: async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `proof_${Math.random()}.${fileExt}`;
+    const filePath = `proofs/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  },
+
+  updateProductImage: async (id: number, imageUrl: string): Promise<void> => {
+    const { error } = await supabase
+      .from("products")
+      .update({ image_url: imageUrl })
       .eq("id", id);
     if (error) throw error;
   },

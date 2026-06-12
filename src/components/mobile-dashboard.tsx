@@ -174,6 +174,10 @@ export function MobileDashboard() {
   const [sharingLocationId, setSharingLocationId] = useState<number | null>(null);
   const watchIdRef = useRef<number | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingProofUpdate, setPendingProofUpdate] = useState<{ id: number, status: TrackingStatus } | null>(null);
+
+
   const showNotice = (tone: "success" | "error", message: string) => {
     setNotice({ tone, message });
   };
@@ -611,6 +615,14 @@ export function MobileDashboard() {
   }
 
   function handleUpdateTracking(requestId: number, trackingStatus: TrackingStatus) {
+    if (trackingStatus === "ready_to_deliver" || trackingStatus === "completed") {
+      if (window.confirm("Apakah Anda ingin melampirkan Foto Bukti Pengiriman?")) {
+        setPendingProofUpdate({ id: requestId, status: trackingStatus });
+        fileInputRef.current?.click();
+        return;
+      }
+    }
+    
     startTransition(() => {
       void (async () => {
         try {
@@ -629,6 +641,35 @@ export function MobileDashboard() {
       })();
     });
   }
+
+  const handleProofFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !pendingProofUpdate) return;
+
+    const { id, status } = pendingProofUpdate;
+    setPendingProofUpdate(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    startTransition(() => {
+      void (async () => {
+        try {
+          setNotice({ tone: "success", message: "Mengunggah foto bukti..." });
+          const proofUrl = await api.uploadProofImage(file);
+          await api.updateTrackingStatus(id, status, proofUrl);
+          await refreshDashboard(false);
+          setNotice({
+            tone: "success",
+            message: `Status tracking diperbarui dengan foto bukti.`,
+          });
+        } catch (error) {
+          setNotice({
+            tone: "error",
+            message: (error as any)?.message || "Gagal mengunggah foto bukti.",
+          });
+        }
+      })();
+    });
+  };
 
   const TRACKING_OPTIONS: { key: TrackingStatus; label: string }[] = [
     { key: "pending", label: "Pesanan Dibuat" },
@@ -759,6 +800,15 @@ export function MobileDashboard() {
   return (
     <main className="relative mx-auto flex min-h-screen w-full max-w-[460px] flex-col px-4 pb-28 pt-5 text-[#2f2118] sm:px-6">
       <div className="absolute inset-x-0 top-0 -z-10 h-[420px] rounded-b-[48px] bg-[radial-gradient(circle_at_top,_rgba(255,176,111,0.34),_transparent_58%),linear-gradient(180deg,_#fff8f1_0%,_rgba(255,248,241,0)_100%)]" />
+
+      <input
+        type="file"
+        accept="image/*"
+        capture="environment"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={(e) => void handleProofFileChange(e)}
+      />
 
       {notice ? (
         <div className="fixed left-0 right-0 top-4 z-[100] mx-auto w-full max-w-[420px] px-4 animate-[fadeIn_0.3s_ease]">
