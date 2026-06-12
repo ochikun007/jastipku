@@ -236,8 +236,14 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
   }
 
   return (
-    <div className="order-page-container relative overflow-hidden min-h-screen">
-      {/* Decorative background elements removed for mobile performance */}
+    <div className="order-page-container relative overflow-hidden min-h-screen bg-gradient-to-br from-[#fff1eb] via-[#fffaf7] to-[#ffece6] pb-24">
+      {/* BACKGROUND FLOATING EMOJIS */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }} className="absolute top-[20%] left-[10%] text-6xl opacity-[0.04]">📦</motion.div>
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }} transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 1 }} className="absolute top-[60%] left-[15%] text-5xl opacity-[0.04]">🛵</motion.div>
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, -25, 0], rotate: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 2 }} className="absolute top-[30%] right-[10%] text-6xl opacity-[0.04]">🛍️</motion.div>
+        <motion.div style={{ willChange: "transform" }} animate={{ y: [0, 20, 0], rotate: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.5 }} className="absolute top-[70%] right-[15%] text-5xl opacity-[0.04]">🍔</motion.div>
+      </div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -304,10 +310,10 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
                 >
                   <div className="tracking-step-line-area">
                     <motion.div 
-                      className={`tracking-step-dot ${isDone ? "tracking-step-dot-done" : ""} ${isActive ? "tracking-step-dot-active" : ""}`}
+                      className={`tracking-step-dot ${isDone ? "tracking-step-dot-done" : ""} ${isActive ? "tracking-step-dot-active shadow-[0_0_15px_rgba(204,100,49,0.5)]" : ""}`}
                       initial={isDone || isActive ? { scale: 0 } : false}
-                      animate={isDone || isActive ? { scale: 1 } : false}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      animate={isActive ? { scale: [1, 1.15, 1] } : (isDone ? { scale: 1 } : false)}
+                      transition={isActive ? { repeat: Infinity, duration: 2, ease: "easeInOut" } : { type: "spring", stiffness: 300, damping: 20 }}
                     >
                       {isDone ? "✓" : step.icon}
                     </motion.div>
@@ -329,13 +335,20 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
           {/* Live GPS Map */}
           {request.courier_lat && request.courier_lng && !isCompleted && (
             <motion.div 
-              className="mt-6 border border-[#f2dfcf] rounded-[24px] overflow-hidden shadow-sm"
+              className="mt-6 border-2 border-[#cc6431] rounded-[24px] overflow-hidden shadow-[0_0_25px_rgba(204,100,49,0.2)]"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               transition={{ duration: 0.5 }}
             >
-              <div className="bg-[#cc6431] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                <span className="animate-pulse">📍</span> Live Kurir Location
+              <div className="bg-[#cc6431] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                  </span>
+                  Lacak Kurir Secara Langsung
+                </div>
+                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">LIVE</span>
               </div>
               <div className="w-full h-[250px] bg-[#fffaf6] relative pointer-events-none">
                 <iframe
@@ -402,7 +415,13 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
               transition={{ delay: 0.5, type: "spring" }}
               className="mt-6 border border-[#f2dfcf] bg-white/80 rounded-[28px] p-6 shadow-sm text-center"
             >
-              <div className="text-4xl mb-3">🎉</div>
+              <motion.div 
+                className="text-6xl mb-4"
+                animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              >
+                🎉
+              </motion.div>
               <p className="text-xl font-bold text-[#2c1c14] mb-2 font-[family:var(--font-display)]">Pesanan Selesai!</p>
               <p className="text-[#8a6a56] text-sm mb-6">Terima kasih sudah menggunakan jasa <strong>Jstipku</strong>. Jangan lupa order lagi ya! 🧡</p>
               
