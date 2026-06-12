@@ -4,7 +4,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import type { OrderRequest, TrackingStatus, OrderDetail } from "@/lib/types";
 import { use } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
 
 /* ─── Tracking Steps Definition ─── */
 const TRACKING_STEPS: { key: TrackingStatus; label: string; icon: string }[] = [
@@ -206,8 +207,42 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(!!request.review_rating);
 
+  // Gallery states
+  const shoppingImages = request.shopping_images || [];
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
   // Elapsed Time hook
   const [elapsedTime, setElapsedTime] = useState("");
+
+  useEffect(() => {
+    if (isCompleted && !reviewSubmitted) {
+      // Trigger confetti
+      const duration = 3000;
+      const end = Date.now() + duration;
+
+      const frame = () => {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ['#3b82f6', '#8b5cf6', '#ec4899']
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ['#3b82f6', '#8b5cf6', '#ec4899']
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+    }
+  }, [isCompleted, reviewSubmitted]);
 
   useEffect(() => {
     // 4 is the index for "ready_to_deliver" (Pesanan Siap Antar)
@@ -406,6 +441,72 @@ function TrackingView({ request, onRefresh }: { request: OrderRequest; onRefresh
                 style={{ border: "none", filter: "contrast(1.1) saturate(1.2)" }}
               ></iframe>
             </div>
+          </motion.div>
+        )}
+
+        {/* Live Shopping Gallery */}
+        {shoppingImages.length > 0 && !isCompleted && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[24px] p-6 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-[13px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                </span>
+                Live Shopping Gallery
+              </h2>
+              <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
+                {activeImageIndex + 1} / {shoppingImages.length}
+              </span>
+            </div>
+
+            <div className="relative w-full aspect-[4/5] bg-black/5 rounded-[16px] overflow-hidden group">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={activeImageIndex}
+                  src={shoppingImages[activeImageIndex]}
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full h-full object-cover"
+                  alt="Live Shopping"
+                />
+              </AnimatePresence>
+
+              {/* Navigation controls */}
+              {shoppingImages.length > 1 && (
+                <>
+                  <button 
+                    onClick={() => setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : shoppingImages.length - 1))}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/70 backdrop-blur rounded-full text-slate-800 shadow-sm active:scale-95 transition-transform"
+                  >
+                    ←
+                  </button>
+                  <button 
+                    onClick={() => setActiveImageIndex((prev) => (prev < shoppingImages.length - 1 ? prev + 1 : 0))}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/70 backdrop-blur rounded-full text-slate-800 shadow-sm active:scale-95 transition-transform"
+                  >
+                    →
+                  </button>
+                </>
+              )}
+            </div>
+            
+            {/* Thumbnails */}
+            {shoppingImages.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                {shoppingImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={`relative w-14 h-14 shrink-0 rounded-[10px] overflow-hidden snap-start transition-all ${activeImageIndex === idx ? 'ring-2 ring-purple-500 scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
+                  >
+                    <img src={img} className="w-full h-full object-cover" alt="thumb" />
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
 

@@ -630,6 +630,31 @@ export const api = {
     return data.publicUrl;
   },
 
+  uploadShoppingImage: async (id: number, file: File, currentImages: string[] = []): Promise<void> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `shopping_${Math.random()}.${fileExt}`;
+    const filePath = `shopping/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(filePath);
+
+    const newImages = [...currentImages, data.publicUrl];
+    
+    const { error } = await supabase
+      .from("order_requests")
+      .update({ shopping_images: newImages })
+      .eq("id", id);
+      
+    if (error) throw error;
+  },
+
   updateProductImage: async (id: number, imageUrl: string): Promise<void> => {
     const { error } = await supabase
       .from("products")

@@ -177,6 +177,9 @@ export function MobileDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingProofUpdate, setPendingProofUpdate] = useState<{ id: number, status: TrackingStatus } | null>(null);
 
+  const shoppingInputRef = useRef<HTMLInputElement>(null);
+  const [shoppingImageUploadId, setShoppingImageUploadId] = useState<number | null>(null);
+
 
   const showNotice = (tone: "success" | "error", message: string) => {
     setNotice({ tone, message });
@@ -671,6 +674,37 @@ export function MobileDashboard() {
     });
   };
 
+  const handleShoppingImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !shoppingImageUploadId) return;
+
+    const id = shoppingImageUploadId;
+    setShoppingImageUploadId(null);
+    if (shoppingInputRef.current) shoppingInputRef.current.value = "";
+
+    startTransition(() => {
+      void (async () => {
+        try {
+          setNotice({ tone: "success", message: "Mengunggah foto belanja..." });
+          const request = orderRequests.find(r => r.id === id);
+          const currentImages = request?.shopping_images || [];
+          
+          await api.uploadShoppingImage(id, file, currentImages);
+          await refreshDashboard(false);
+          setNotice({
+            tone: "success",
+            message: `Foto belanja berhasil ditambahkan ke galeri live!`,
+          });
+        } catch (error) {
+          setNotice({
+            tone: "error",
+            message: (error as any)?.message || "Gagal mengunggah foto belanja.",
+          });
+        }
+      })();
+    });
+  };
+
   const TRACKING_OPTIONS: { key: TrackingStatus; label: string }[] = [
     { key: "pending", label: "Pesanan Dibuat" },
     { key: "accepted", label: "Pesanan Diterima" },
@@ -808,6 +842,15 @@ export function MobileDashboard() {
         ref={fileInputRef}
         className="hidden"
         onChange={(e) => void handleProofFileChange(e)}
+      />
+
+      <input
+        type="file"
+        accept="image/*"
+        capture="environment"
+        ref={shoppingInputRef}
+        className="hidden"
+        onChange={(e) => void handleShoppingImageChange(e)}
       />
 
       {notice ? (
@@ -1059,6 +1102,16 @@ export function MobileDashboard() {
                       ) : (
                         <><MapPin className="w-4 h-4" /> Bagikan Lokasi Live GPS</>
                       )}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShoppingImageUploadId(req.id);
+                        shoppingInputRef.current?.click();
+                      }}
+                      className="mt-2 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold bg-[#fff7ed] text-orange-600 border border-orange-200 hover:bg-orange-50 transition-all"
+                    >
+                      📸 Tambah Foto Belanja (Live)
                     </button>
                   </div>
                 ))}

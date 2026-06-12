@@ -132,6 +132,7 @@ export type OrderRequest = {
   courier_lat?: number | null;
   courier_lng?: number | null;
   proof_image_url?: string | null;
+  shopping_images?: string[];
   created_at: string;
 };
 

@@ -87,6 +87,7 @@ CREATE TABLE order_requests (
     courier_lat FLOAT,
     courier_lng FLOAT,
     proof_image_url TEXT,
+    shopping_images JSONB NOT NULL DEFAULT '[]'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
